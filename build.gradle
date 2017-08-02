@@ -1,0 +1,46 @@
+apply from: "./libraries.gradle"
+
+allprojects {
+    apply plugin: 'java'
+    group 'ru.dobrokvashinevgeny.tander'
+    version = '1.0'
+
+    ext.jdkVersion = '1.8'
+
+    sourceCompatibility = "$jdkVersion"
+    targetCompatibility = "$jdkVersion"
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        testCompile(libraries.junit) {
+            exclude group: 'org.hamcrest', module: 'hamcrest-core'
+        }
+        testCompile(libraries.hamcrest)
+    }
+}
+
+task copyDependencies(type: Copy) {
+    from configurations.runtime
+    into 'libs'
+}
+
+dependencies {
+    compile project(':testtask-interfaces')
+    compile project(':testtask-entry-impl')
+    compile project(':testtask-registry')
+    compile project(':testtask-entrygenerator-impl')
+    compile project(':testtask-entryrepository-impl')
+    compile project(':testtask-entrytransfer-impl')
+    compile project(':testtask-entryconverter-impl')
+
+    compile(libraries.h2)
+
+    testCompile(libraries.mockito)
+}

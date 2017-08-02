@@ -1,0 +1,11 @@
+rootProject.name = 'testtask'
+include 'testtask-interfaces'
+include 'testtask-entrygenerator-impl'
+include 'testtask-entry-impl'
+include 'testtask-entryrepository-impl'
+include 'testtask-entrytransfer-impl'
+include 'testtask-entryconverter-impl'
+include 'testtask-registry'
+include 'testtask-filerepository-impl'
+include 'testtask-calculator-impl'
+

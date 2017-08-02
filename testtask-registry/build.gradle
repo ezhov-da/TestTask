@@ -1,0 +1,8 @@
+dependencies {
+    compile project(':testtask-interfaces')
+    compile project(':testtask-entry-impl')
+    compile project(':testtask-entrygenerator-impl')
+    compile project(':testtask-entryrepository-impl')
+
+    testCompile(libraries.mockito)
+}
