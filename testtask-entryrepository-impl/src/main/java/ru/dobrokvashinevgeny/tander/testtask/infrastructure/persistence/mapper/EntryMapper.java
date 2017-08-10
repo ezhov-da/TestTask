@@ -31,7 +31,7 @@ public class EntryMapper extends AbstractMapper {
 
 		@Override
 		public String sql() {
-			return "select field from Test where field between ? and ?";
+			return "select field from (select field from Test order by field) where field between ? and ?";
 		}
 
 		@Override

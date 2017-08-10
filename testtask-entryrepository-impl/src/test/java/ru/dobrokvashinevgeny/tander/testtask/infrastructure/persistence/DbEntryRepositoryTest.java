@@ -91,19 +91,19 @@ public class DbEntryRepositoryTest {
 	public void testGetEntriesFromRange() throws Exception {
 		when(connection.prepareStatement( anyString() )).thenReturn( stmt );
 		ResultSet rs = mock( ResultSet.class );
-		when(rs.next()).thenReturn( true, true, true, true, true, false );
+		when(rs.next()).thenReturn( true, true, true, false );
 		when(rs.getLong(1))
-				.thenReturn( 1L, 2L, 3L, 4L, 5L );
+				.thenReturn( 2L, 3L, 4L );
 		when( stmt.executeQuery() ).thenReturn( rs );
 
-		final int from = 2;
-		final int to = 4;
+		final long from = 2;
+		final long to = 4;
 		List<Entry> entries = entryRepository.getEntriesFromRange(from, to);
 
 		verify( connection ).prepareStatement(eq(
 				"select " + FIELD_NAME + " from (select field from " + TABLE_NAME + " order by " + FIELD_NAME + ") where field between ? and ?"));
-		verify(stmt).setLong(1, from);
-		verify(stmt).setLong(2, to);
+		verify(stmt).setObject(1, from);
+		verify(stmt).setObject(2, to);
 		assertThat(entries,
 				containsInAnyOrder(new EntryImpl( 2L ), new EntryImpl( 3L ), new EntryImpl( 4L )));
 	}
