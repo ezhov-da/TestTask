@@ -67,7 +67,7 @@ public class TestTaskService {
 		return (EntryGenerator) getInstanceWoParamsByClassName(config.getEntryGeneratorImplClassName());
 	}
 
-	private Object getInstanceWoParamsByClassName(String className) throws TestTaskServiceException {
+	protected Object getInstanceWoParamsByClassName(String className) throws TestTaskServiceException {
 		try {
 			return Class.forName(className).newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
@@ -75,7 +75,7 @@ public class TestTaskService {
 		}
 	}
 
-	private EntryRepository createEntryRepository(DataSource dataSource) throws TestTaskServiceException {
+	protected EntryRepository createEntryRepository(DataSource dataSource) throws TestTaskServiceException {
 		try {
 			return
 				(EntryRepository) Class.forName(config.getEntryRepositoryImplClassName())
@@ -102,7 +102,7 @@ public class TestTaskService {
 	}
 
 	private FileRepository createFileStore() throws TestTaskServiceException {
-		return (FileRepository) getInstanceWoParamsByClassName(config.getFileStoreImplClassName());
+		return (FileRepository) getInstanceWoParamsByClassName(config.getFileRepositoryImplClassName());
 	}
 
 	private EntryConverterService createEntryConverterService() throws TestTaskServiceException {

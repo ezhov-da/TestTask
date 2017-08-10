@@ -5,44 +5,37 @@ package ru.dobrokvashinevgeny.tander.testtask.service;
  */
 public interface TestTaskServiceConfig {
 	/**
-	 *
-	 * @return
+	 * Имя класса реализации интерфейса EntryGenerator
 	 */
 	String getEntryGeneratorImplClassName();
 
 	/**
-	 *
-	 * @return
+	 * Имя класса реализации интерфейса EntryRepository
 	 */
 	String getEntryRepositoryImplClassName();
 
 	/**
-	 *
-	 * @return
+	 * Имя класса реализации интерфейса EntryTransfer
 	 */
 	String getEntryTransferImplClassName();
 
 	/**
-	 *
-	 * @return
+	 * Имя класса реализации интерфейса EntryConverter
 	 */
 	String getEntryConverterImplClassName();
 
 	/**
-	 *
-	 * @return
+	 * Имя класса реализации интерфейса FileRepository
 	 */
-	String getFileStoreImplClassName();
+	String getFileRepositoryImplClassName();
 
 	/**
-	 *
-	 * @return
+	 * Имя класса реализации интерфейса Calculator
 	 */
 	String getCalculatorImplClassName();
 
 	/**
 	 * Размер пакета для паектной обработки данных в приложении
-	 * @return
 	 */
 	int getBatchSize();
 }

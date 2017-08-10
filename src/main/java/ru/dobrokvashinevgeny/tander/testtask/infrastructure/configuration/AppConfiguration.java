@@ -39,7 +39,7 @@ public class AppConfiguration implements AppConfig {
 
 	private String entryConverterImplClassName;
 
-	private String fileStoreImplClassName;
+	private String fileRepositoryImplClassName;
 
 	private String calculatorImplClassName;
 
@@ -72,7 +72,7 @@ public class AppConfiguration implements AppConfig {
 		entryRepositoryImplClassName = appProperties.getProperty("bean.entryRepositoryImpl.className");
 		entryTransferImplClassName = appProperties.getProperty("bean.entryTransferImpl.className");
 		entryConverterImplClassName = appProperties.getProperty("bean.entryConverterImpl.className");
-		fileStoreImplClassName = appProperties.getProperty("bean.fileStoreImpl.className");
+		fileRepositoryImplClassName = appProperties.getProperty("bean.fileStoreImpl.className");
 		calculatorImplClassName = appProperties.getProperty("bean.calculatorImpl.className");
 		dataSourceImplClassName = appProperties.getProperty("bean.dataSourceImpl.className");
 	}
@@ -98,8 +98,8 @@ public class AppConfiguration implements AppConfig {
 	}
 
 	@Override
-	public String getFileStoreImplClassName() {
-		return fileStoreImplClassName;
+	public String getFileRepositoryImplClassName() {
+		return fileRepositoryImplClassName;
 	}
 
 	@Override

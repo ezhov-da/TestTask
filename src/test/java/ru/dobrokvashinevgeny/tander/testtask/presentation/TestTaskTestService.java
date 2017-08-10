@@ -10,8 +10,9 @@ import ru.dobrokvashinevgeny.tander.testtask.domain.model.generator.EntryGenerat
 import ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence.DataSource;
 import ru.dobrokvashinevgeny.tander.testtask.service.*;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static ru.dobrokvashinevgeny.tander.testtask.infrastructure.configuration.AppConfiguration.*;
 
 /**
  */
@@ -31,50 +32,70 @@ public class TestTaskTestService {
 		TestTaskServiceConfig testTaskServiceConfig = new TestTaskServiceConfig() {
 			@Override
 			public String getEntryGeneratorImplClassName() {
-				return "";
+				return "generator";
 			}
 
 			@Override
 			public String getEntryRepositoryImplClassName() {
-				return null;
+				return "entryRep";
 			}
 
 			@Override
 			public String getEntryTransferImplClassName() {
-				return null;
+				return "transfer";
 			}
 
 			@Override
 			public String getEntryConverterImplClassName() {
-				return null;
+				return "converter";
 			}
 
 			@Override
-			public String getFileStoreImplClassName() {
-				return null;
+			public String getFileRepositoryImplClassName() {
+				return "filerep";
 			}
 
 			@Override
 			public String getCalculatorImplClassName() {
-				return null;
+				return "calculator";
 			}
 
 			@Override
 			public int getBatchSize() {
-				return 0;
+				return BATCH_SIZE;
 			}
 		};
 
-		TestTaskService testTaskService = spy(new TestTaskService(N, testTaskServiceConfig, dataSource));
+		TestTaskService testTaskService = new TestTaskService(N, testTaskServiceConfig, dataSource) {
+			@Override
+			protected Object getInstanceWoParamsByClassName(String className) throws TestTaskServiceException {
+				switch (className) {
+					case "generator": return entryGenerator;
+					case "entryRep": return entryRepository;
+					case "transfer": return entryTransfer;
+					case "converter": return converterService;
+					case "filerep": return fileRepository;
+					case "calculator": return calculator;
+				}
+				return null;
+			}
+
+			@Override
+			protected EntryRepository createEntryRepository(DataSource dataSource) throws TestTaskServiceException {
+				return entryRepository;
+			}
+		};
 
 		testTaskService.calculateSumOfEntriesData();
 
 		verify(entryTransfer)
 				.transferFromGeneratorToRepository(
 					entryGenerator, entryRepository, N, BATCH_SIZE);
-		verify(converterService).convertEntriesToXml(entryRepository, fileRepository, anyString(), BATCH_SIZE);
 		verify(converterService)
-			.transformEntriesXml(fileRepository, anyString(), anyString(), anyString(), anyString(), BATCH_SIZE);
-		verify(calculator).getSumOfEntriesDataFrom(fileRepository, anyString());
+			.convertEntriesToXml(entryRepository, fileRepository, IN_XML_FILE_NAME, BATCH_SIZE);
+		verify(converterService)
+			.transformEntriesXml(fileRepository, XSLT_FILE_NAME, IN_XML_FILE_NAME, OUT_XML_FILE_NAME,
+				TMP_XML_FILE_NAME, BATCH_SIZE);
+		verify(calculator).getSumOfEntriesDataFrom(fileRepository, OUT_XML_FILE_NAME);
 	}
 }
