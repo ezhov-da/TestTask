@@ -1,14 +1,24 @@
 package ru.dobrokvashinevgeny.tander.testtask.domain.model.entry;
 
 /**
- * @author Evgeny Dobrokvashin
- * Created by Stalker on 23.07.2017.
- * @version 1.0 2017
+ * Интерфейс конфигурационных данных репозитария Entries
  */
 public interface RepositoryConfig {
+	/**
+	 * URL соединения с БД
+	 * @return URL
+	 */
 	String getConnectionUrl();
 
+	/**
+	 * Логин пользователя БД
+	 * @return логин
+	 */
 	String getUserName();
 
+	/**
+	 * Пароль пользователя БД
+	 * @return пароль
+	 */
 	String getUserPsw();
 }

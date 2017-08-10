@@ -10,21 +10,20 @@ import ru.dobrokvashinevgeny.tander.testtask.domain.model.generator.*;
 import java.util.*;
 
 /**
- * @version 1.0 2017
- * @author Evgeny Dobrokvashin
- * Created by Stalker on 18.07.2017.
+ * Однопоточная реализация сервиса передачи сгенерированных Entries в их хранилище для сохренения
  */
 public class SingleThreadEntryTransfer implements EntryTransfer {
 	@Override
-	public void transferFromGeneratorToRepository(EntryGenerator source, EntryRepository destination,
-												  long numberOfEntriesToTransfer, int entriesBatchSize)
+	public void transferFromGeneratorToRepository(EntryGenerator source, EntryRepository entryRepository,
+												  long numberOfEntriesToTransfer,
+												  int entriesBatchSize)
 			throws EntryTransferException {
 		final List<Entry> entries = new ArrayList<>(entriesBatchSize);
 		try {
 			for (int curBatchNumber = 0;
 			     curBatchNumber < getNumberOfBatchExecutions(numberOfEntriesToTransfer, entriesBatchSize);
 			     curBatchNumber++) {
-				transferEntriesBatch(source, destination, entries,
+				transferEntriesBatch(source, entryRepository, entries,
 						getEntriesBatchSize(numberOfEntriesToTransfer, entriesBatchSize, curBatchNumber));
 			}
 		} catch (EntryGeneratorException | EntryRepositoryException e) {

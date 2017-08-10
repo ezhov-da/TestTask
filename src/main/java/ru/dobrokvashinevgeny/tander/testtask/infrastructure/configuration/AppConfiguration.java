@@ -11,12 +11,15 @@ import java.nio.file.*;
 import java.util.Properties;
 
 /**
- * @version 1.0 2017
- * @author Evgeny Dobrokvashin
- * Created by Stalker on 23.07.2017.
+ * Класс AppConfiguration хранитель конфигурации приложения
  */
 public class AppConfiguration implements AppConfig {
-	private static final String APP_CONFIG_FILE_NAME = "appConfig.properties";
+	public static final String XSLT_FILE_NAME = "1to2.xslt";
+	public static final String IN_XML_FILE_NAME = "1.xml";
+	public static final String OUT_XML_FILE_NAME = "2.xml";
+	public static final String TMP_XML_FILE_NAME = "tmp.xml";
+
+	private final String cfgFilePath;
 
 	private long n;
 
@@ -39,6 +42,12 @@ public class AppConfiguration implements AppConfig {
 	private String fileStoreImplClassName;
 
 	private String calculatorImplClassName;
+
+	private String dataSourceImplClassName;
+
+	public AppConfiguration(String cfgFilePath) {
+		this.cfgFilePath = cfgFilePath;
+	}
 
 	@Override
 	public void configure() throws AppConfigurationException {
@@ -65,6 +74,7 @@ public class AppConfiguration implements AppConfig {
 		entryConverterImplClassName = appProperties.getProperty("bean.entryConverterImpl.className");
 		fileStoreImplClassName = appProperties.getProperty("bean.fileStoreImpl.className");
 		calculatorImplClassName = appProperties.getProperty("bean.calculatorImpl.className");
+		dataSourceImplClassName = appProperties.getProperty("bean.dataSourceImpl.className");
 	}
 
 	@Override
@@ -105,7 +115,7 @@ public class AppConfiguration implements AppConfig {
 	private Properties getProperties() throws AppConfigurationException {
 		Properties result = new Properties();
 
-		try(Reader reader = Files.newBufferedReader(Paths.get(APP_CONFIG_FILE_NAME))) {
+		try(Reader reader = Files.newBufferedReader(Paths.get(cfgFilePath))) {
 			result.load(reader);
 		} catch (IOException e) {
 			throw new AppConfigurationException(e);
@@ -114,41 +124,21 @@ public class AppConfiguration implements AppConfig {
 		return result;
 	}
 
-	/**
-	 * Возвращает
-	 *
-	 * @return
-	 */
 	@Override
 	public long getN() {
 		return n;
 	}
 
-	/**
-	 * Возвращает
-	 *
-	 * @return
-	 */
 	@Override
 	public String getConnectionUrl() {
 		return connectionUrl;
 	}
 
-	/**
-	 * Возвращает
-	 *
-	 * @return
-	 */
 	@Override
 	public String getUserName() {
 		return userName;
 	}
 
-	/**
-	 * Возвращает
-	 *
-	 * @return
-	 */
 	@Override
 	public String getUserPsw() {
 		return userPsw;

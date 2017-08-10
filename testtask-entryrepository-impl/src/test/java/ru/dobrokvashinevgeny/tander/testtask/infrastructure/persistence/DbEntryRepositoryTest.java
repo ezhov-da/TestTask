@@ -28,24 +28,15 @@ public class DbEntryRepositoryTest {
 	private Connection connection;
 	private PreparedStatement stmt;
 
-	class TestDbEntryRepository extends DbEntryRepository {
-		TestDbEntryRepository(String connectionUrl, String userName, String userPsw) {
-			super(connectionUrl, userName, userPsw);
-		}
-
-		void setConnection(Connection connection) {
-			this.connection = connection;
-		}
-	}
-
 	@Before
 	public void setUp() throws Exception {
+		DataSource dataSource = mock(DataSource.class);
 		connection = mock(Connection.class);
 		stmt = mock(PreparedStatement.class);
 
-		final TestDbEntryRepository testRepository = new TestDbEntryRepository("", "", "");
-		testRepository.setConnection(connection);
-		this.entryRepository = testRepository;
+		when(dataSource.getConnection()).thenReturn(connection);
+
+		entryRepository = new DbEntryRepository(dataSource);
 	}
 
 	@Test
@@ -94,38 +85,6 @@ public class DbEntryRepositoryTest {
 		entryRepository.clearEntries();
 
 		verify( connection ).prepareStatement( eq("delete from " + TABLE_NAME) );
-	}
-
-	@Test
-	public void testGetEntries() throws Exception {
-		when(connection.prepareStatement( anyString() )).thenReturn( stmt );
-		ResultSet rs = mock( ResultSet.class );
-		when(rs.next()).thenReturn(true, false);
-		when(rs.getLong(1)).thenReturn( 1L );
-		when(stmt.executeQuery()).thenReturn( rs );
-
-		List<Entry> entries = entryRepository.getAllEntries();
-
-		verify( connection ).prepareStatement( eq("select " + FIELD_NAME + " from " + TABLE_NAME) );
-		assertThat(entries, containsInAnyOrder(new EntryImpl( 1L )));
-	}
-
-	@Test
-	public void testGetFirstEntries() throws Exception {
-		when(connection.prepareStatement( anyString() )).thenReturn( stmt );
-		ResultSet rs = mock( ResultSet.class );
-		when(rs.next()).thenReturn(true, true, true, false);
-		when(rs.getLong(1)).thenReturn(1L, 2L, 3L);
-		when(stmt.executeQuery()).thenReturn( rs );
-
-		final int numberEntries = 2;
-		List<Entry> entries = entryRepository.getFirstEntries(numberEntries);
-
-		verify( connection ).prepareStatement(eq(
-				"select " + FIELD_NAME +
-						" from (select field from " + TABLE_NAME + " order by " + FIELD_NAME + ") where field <= ? "));
-		verify(stmt).setLong(1, numberEntries);
-		assertThat(entries, containsInAnyOrder(new EntryImpl( 1L ), new EntryImpl( 2L )));
 	}
 
 	@Test

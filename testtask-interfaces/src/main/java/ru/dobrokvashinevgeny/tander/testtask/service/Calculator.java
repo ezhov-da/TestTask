@@ -1,10 +1,16 @@
 package ru.dobrokvashinevgeny.tander.testtask.service;
 
 /**
- * @author Evgeny Dobrokvashin
- * Created by Stalker on 20.07.2017.
- * @version 1.0 2017
+ * Интерфейс сервиса вычислителя
  */
 public interface Calculator {
-	long getSumOfEntriesDataFrom(FileStore fileStore, String srcFileName) throws CalculatorException;
+
+	/**
+	 * Вычислить сумму полей field у Entries в XML-файле
+	 * @param fileRepository хранилище файлов
+	 * @param srcFileName имя исходного XML-файла
+	 * @return сумма
+	 * @throws CalculatorException если произошла ошибка во время вычисления
+	 */
+	long getSumOfEntriesDataFrom(FileRepository fileRepository, String srcFileName) throws CalculatorException;
 }

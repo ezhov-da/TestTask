@@ -5,137 +5,93 @@
 package ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence;
 
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.*;
-import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.EntryImpl;
+import ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence.mapper.*;
 
 import java.sql.*;
 import java.util.*;
 
 /**
- * @version 1.0 2017
- * @author Evgeny Dobrokvashin
- * Created by Stalker on 16.07.2017.
+ * Реализация репозитария Entries в БД
  */
 public class DbEntryRepository implements EntryRepository {
-	private static final int BATCH_SIZE = 500;
+	private final DataSource dataSource;
 
-	private final String connectionUrl;
-
-	private final String userName;
-
-	private final String userPsw;
-
-	protected Connection connection;
-
-	interface ConnectionWorkTask<T> {
-		T call(Connection connection) throws SQLException;
-	}
-
-	public DbEntryRepository(String connectionUrl, String userName, String userPsw) {
-		this.connectionUrl = connectionUrl;
-		this.userName = userName;
-		this.userPsw = userPsw;
-	}
-
-	private Connection getConnection() throws SQLException {
-		if (null != connection) {
-			return connection;
-		} else {
-			return DriverManager.getConnection( connectionUrl, userName, userPsw );
-		}
+	/**
+	 * Ининциализирует хранилище
+	 * @param dataSource источник данных
+	 */
+	public DbEntryRepository(DataSource dataSource) {
+		this.dataSource = dataSource;
 	}
 
 	@Override
 	public void putEntries(List<Entry> entries) throws EntryRepositoryException {
-		try(Connection connection = getConnection();
-			PreparedStatement stmt = connection.prepareStatement( "insert into Test(field) values(?)" )) {
-			int batchCounter = 0;
-			for (Entry entry : entries) {
-				stmt.setLong( 1, entry.getValue() );
-				stmt.addBatch();
+		try(Connection connection = dataSource.getConnection()) {
+			try {
+				connection.setAutoCommit(false);
 
-				if (batchCounter++ > BATCH_SIZE) {
-					stmt.executeBatch();
-				}
+				EntryMapper entryMapper = new EntryMapper();
+				entryMapper.setConnection(connection);
+				entryMapper.insertWithBatch(entries);
+
+				connection.commit();
+			} catch (SQLException e) {
+				connection.rollback();
+				throw new EntryRepositoryException(e);
 			}
 
-			if (batchCounter <= BATCH_SIZE) {
-				stmt.executeBatch();
-			}
-		} catch (SQLException e) {
-			throw new EntryRepositoryException( e );
+			connection.setAutoCommit(true);
+		} catch (SQLException | MapperException e) {
+			throw new EntryRepositoryException(e);
 		}
 	}
 
 	@Override
-	public List<Entry> getAllEntries() throws EntryRepositoryException {
-		return connectionWorkExecutor( new ConnectionWorkTask<List<Entry>>() {
-			@Override
-			public List<Entry> call(Connection connection) throws SQLException {
-				JdbcTemplate jdbcTemplate = new JdbcTemplate(connection);
-				return jdbcTemplate.executeQuery(
-						"select field from Test", new SqlTemplateMatcher<Entry>() {
-							@Override
-							public Entry match(ResultSet rs) throws SQLException {
-								return new EntryImpl( rs.getLong( 1 ) );
-							}
-						});
-			}
-		});
-	}
-
-	@Override
-	public List<Entry> getFirstEntries(long numberEntries) throws EntryRepositoryException {
-		return null;
-	}
-
-	@Override
 	public List<Entry> getEntriesFromRange(long from, long to) throws EntryRepositoryException {
-		return null;
-	}
-
-	private <T> T connectionWorkExecutor(ConnectionWorkTask<T> task) throws EntryRepositoryException {
-		try(Connection connection = getConnection()) {
-			return task.call(connection);
-		} catch (SQLException e) {
-			throw new EntryRepositoryException( e );
+		try(Connection connection = dataSource.getConnection()) {
+			EntryMapper entryMapper = new EntryMapper();
+			entryMapper.setConnection(connection);
+			return entryMapper.findByRange(from, to);
+		} catch (SQLException | MapperException e) {
+			throw new EntryRepositoryException(e);
 		}
 	}
 
 	@Override
 	public boolean isEntriesExists() throws EntryRepositoryException {
-		return connectionWorkExecutor( new ConnectionWorkTask<Boolean>() {
-			@Override
-			public Boolean call(Connection connection) throws SQLException {
-				JdbcTemplate jdbcTemplate = new JdbcTemplate(connection);
-				return jdbcTemplate.exists("select field from Test");
-			}
-		});
+		try(Connection connection = dataSource.getConnection();
+			PreparedStatement statement = connection.prepareStatement("select field from Test");
+			ResultSet rs = statement.executeQuery()) {
+			return rs.next();
+		} catch (SQLException e) {
+			throw new EntryRepositoryException(e);
+		}
 	}
 
 	@Override
 	public void clearEntries() throws EntryRepositoryException {
-		connectionWorkExecutor( new ConnectionWorkTask<Void>() {
-			@Override
-			public Void call(Connection connection) throws SQLException {
-				JdbcTemplate jdbcTemplate = new JdbcTemplate(connection);
-				jdbcTemplate.executeQuery("delete from Test");
-				return null;
-			}
-		});
+		try(Connection connection = dataSource.getConnection();
+			PreparedStatement statement = connection.prepareStatement("delete from Test")) {
+			statement.executeUpdate();
+		} catch (SQLException e) {
+			throw new EntryRepositoryException(e);
+		}
 	}
 
 	@Override
 	public void createDataStructure() throws EntryRepositoryException {
-		connectionWorkExecutor( new ConnectionWorkTask<Void>() {
-			@Override
-			public Void call(Connection connection) throws SQLException {
-				JdbcTemplate jdbcTemplate = new JdbcTemplate(connection);
-				if (jdbcTemplate.exists( "select null from information_schema.tables where table_name = 'Test'" )) {
-					jdbcTemplate.executeQuery( "drop table Test" );
-				}
-				jdbcTemplate.executeQuery("create table Test (field int not null)");
-				return null;
+		try(Connection connection = dataSource.getConnection();
+			PreparedStatement statement = connection.prepareStatement("select null from information_schema.tables where table_name = 'Test'");
+			PreparedStatement dropStatement = connection.prepareStatement("drop table Test");
+			PreparedStatement createStatement = connection.prepareStatement("create table Test (field int not null)");
+			ResultSet rs = statement.executeQuery()) {
+			if (rs.next()) {
+				dropStatement.executeUpdate();
 			}
-		});
+
+			createStatement.executeUpdate();
+		} catch (SQLException e) {
+			throw new EntryRepositoryException(e);
+		}
 	}
 }

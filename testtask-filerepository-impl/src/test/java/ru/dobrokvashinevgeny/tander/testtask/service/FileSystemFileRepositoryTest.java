@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.equalTo;
  * @author Evgeny Dobrokvashin
  * Created by Stalker on 26.07.2017.
  */
-public class FileSystemFileStoreTest {
+public class FileSystemFileRepositoryTest {
 	private static final String READ_FILE_NAME = "test_read1.txt";
 	private static final String WRITE_FILE_NAME = "test_write1.txt";
 	private static final String FAIL_WRITE_FILE_NAME = "z:\\test_write1.txt";
@@ -26,11 +26,11 @@ public class FileSystemFileStoreTest {
 
 	@Test
 	public void testGetFileDataReaderByNameOk() throws Exception {
-		FileStore fileStore = new FileSystemFileStore();
+		FileRepository fileRepository = new FileSystemFileRepository();
 
 		createFileInFileSystemWithData(READ_FILE_NAME, TEST_DATA);
 
-		try(BufferedReader reader = fileStore.getFileDataReaderByName(READ_FILE_NAME)) {
+		try(BufferedReader reader = fileRepository.getFileDataReaderByName(READ_FILE_NAME)) {
 			assertThat(reader.readLine(), equalTo(TEST_DATA));
 		} finally {
 			Files.deleteIfExists(Paths.get(READ_FILE_NAME));
@@ -44,20 +44,20 @@ public class FileSystemFileStoreTest {
 		}
 	}
 
-	@Test(expected = FileStoreException.class)
+	@Test(expected = FileRepositoryException.class)
 	public void testGetFileDataReaderByNameFail() throws Exception {
-		FileStore fileStore = new FileSystemFileStore();
+		FileRepository fileRepository = new FileSystemFileRepository();
 
-		try(BufferedReader reader = fileStore.getFileDataReaderByName(READ_FILE_NAME)) {
+		try(BufferedReader reader = fileRepository.getFileDataReaderByName(READ_FILE_NAME)) {
 			assertThat(reader.readLine(), equalTo(TEST_DATA));
 		}
 	}
 
 	@Test
 	public void testGetFileDataWriterByNameOk() throws Exception {
-		FileStore fileStore = new FileSystemFileStore();
+		FileRepository fileRepository = new FileSystemFileRepository();
 
-		try(BufferedWriter writer = fileStore.getFileDataWriterByName(WRITE_FILE_NAME)) {
+		try(BufferedWriter writer = fileRepository.getFileDataWriterByName(WRITE_FILE_NAME)) {
 			writer.write(TEST_DATA);
 		}
 
@@ -66,11 +66,11 @@ public class FileSystemFileStoreTest {
 		}
 	}
 
-	@Test(expected = FileStoreException.class)
+	@Test(expected = FileRepositoryException.class)
 	public void testGetFileDataWriterByNameFail() throws Exception {
-		FileStore fileStore = new FileSystemFileStore();
+		FileRepository fileRepository = new FileSystemFileRepository();
 
-		try(BufferedWriter writer = fileStore.getFileDataWriterByName(FAIL_WRITE_FILE_NAME)) {
+		try(BufferedWriter writer = fileRepository.getFileDataWriterByName(FAIL_WRITE_FILE_NAME)) {
 			writer.write(TEST_DATA);
 		}
 	}

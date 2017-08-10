@@ -22,7 +22,7 @@ public class CalculatorTest {
 
 	@Test
 	public void testCalculatorOk() throws Exception {
-		FileStore fileStore = mock(FileStore.class);
+		FileRepository fileRepository = mock(FileRepository.class);
 
 		final String inEntriesXml =
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
@@ -33,16 +33,16 @@ public class CalculatorTest {
 					"<entry field=\"4\"/>" +
 				"</entries>";
 		final BufferedReader inEntriesXmlReaderSpy = spy(new BufferedReader(new StringReader(inEntriesXml)));
-		when(fileStore.getFileDataReaderByName(IN_XML_FILE_NAME)).thenReturn(inEntriesXmlReaderSpy);
+		when(fileRepository.getFileDataReaderByName(IN_XML_FILE_NAME)).thenReturn(inEntriesXmlReaderSpy);
 
 		Calculator calculator = new SingleThreadCalculator();
 
-		long result = calculator.getSumOfEntriesDataFrom(fileStore, IN_XML_FILE_NAME);
+		long result = calculator.getSumOfEntriesDataFrom(fileRepository, IN_XML_FILE_NAME);
 
-		verify(fileStore).getFileDataReaderByName(IN_XML_FILE_NAME);
+		verify(fileRepository).getFileDataReaderByName(IN_XML_FILE_NAME);
 		verify(inEntriesXmlReaderSpy, atLeastOnce()).read(any(char[].class), anyInt(), anyInt());
-		verify(inEntriesXmlReaderSpy).close();
-		verifyNoMoreInteractions(fileStore);
+//		verify(inEntriesXmlReaderSpy).close();
+		verifyNoMoreInteractions(fileRepository);
 		assertThat(result, equalTo(10L));
 	}
 }

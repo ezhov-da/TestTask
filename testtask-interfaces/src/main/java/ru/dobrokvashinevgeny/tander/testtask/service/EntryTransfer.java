@@ -4,12 +4,19 @@ import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.EntryRepository;
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.generator.EntryGenerator;
 
 /**
- * @author Evgeny Dobrokvashin
- *         Created by Stalker on 18.07.2017.
- * @version 1.0 2017
+ * Интерфейс сервиса передачи сгенерированных Entries в их хранилище для сохренения
  */
 public interface EntryTransfer {
-	void transferFromGeneratorToRepository(EntryGenerator generator, EntryRepository repository,
-										   long numberOfEntriesToTransfer, int entriesBatchSize)
+	/**
+	 * Передает сгенерированные Entries в их хранилище для сохренения
+	 * @param generator генератор Entries
+	 * @param entryRepository хранилище Entries
+	 * @param numberOfEntriesToTransfer количество Entries для генерации
+	 * @param entriesBatchSize	размер пакета Entries для обработки
+	 * @throws EntryTransferException если произошла ошибка при передаче
+	 */
+	void transferFromGeneratorToRepository(EntryGenerator generator, EntryRepository entryRepository,
+										   long numberOfEntriesToTransfer,
+										   int entriesBatchSize)
 			throws EntryTransferException;
 }

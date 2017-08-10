@@ -3,15 +3,31 @@ package ru.dobrokvashinevgeny.tander.testtask.service;
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.EntryRepository;
 
 /**
- * @author Evgeny Dobrokvashin
- *         Created by Stalker on 19.07.2017.
- * @version 1.0 2017
+ * Интерфейс сервиса преобразования Entries
  */
 public interface EntryConverterService {
-	void convertEntriesToXml(EntryRepository entryRepository, FileStore fileStore, String destXmlFileName, int batchSize)
+	/**
+	 * Конвертирует Entries из хранлища в XML представление в файл
+	 * @param entryRepository хранилище Entries
+	 * @param fileRepository хранилище файлов
+	 * @param destXmlFileName имя XML файла
+	 * @param batchSize размер пакета для пакетной обработки данных
+	 * @throws EntryConverterServiceException если произошла ошибка во время конвертации
+	 */
+	void convertEntriesToXml(EntryRepository entryRepository, FileRepository fileRepository, String destXmlFileName, int batchSize)
 			throws EntryConverterServiceException;
 
-	void transformEntriesXml(FileStore fileStore, String xsltTemplateFileName, String srcEntriesXmlFileName,
+	/**
+	 * Преобразует XML из файла в соотвествии с XSLT-преобразованием
+	 * @param fileRepository хранилище файлов
+	 * @param xsltTemplateFileName имя файла XSLT-шаблона
+	 * @param srcEntriesXmlFileName имя исходного XML-файла
+	 * @param destXmlFileName имя результирующего XML-файла
+	 * @param tmpXmlFileName имя временного файла
+	 * @param batchSize размер пакета для пакетной обработки данных
+	 * @throws EntryConverterServiceException если произошла ошибка во время XSLT-преобразования
+	 */
+	void transformEntriesXml(FileRepository fileRepository, String xsltTemplateFileName, String srcEntriesXmlFileName,
 							 String destXmlFileName, String tmpXmlFileName, int batchSize)
 		throws EntryConverterServiceException;
 }

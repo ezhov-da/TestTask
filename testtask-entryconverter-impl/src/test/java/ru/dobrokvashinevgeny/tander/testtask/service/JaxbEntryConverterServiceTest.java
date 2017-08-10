@@ -37,7 +37,7 @@ public class JaxbEntryConverterServiceTest {
 	public void testConvertOddEntriesToXmlOk() throws Exception {
 		EntryConverterService converterService = new JaxbEntryConverterService();
 		EntryRepository entryRepository = mock(EntryRepository.class);
-		FileStore fileStore = mock(FileStore.class);
+		FileRepository fileRepository = mock(FileRepository.class);
 
 		List<List<Entry>> entries = new ArrayList<>();
 		int counter = 1;
@@ -60,7 +60,7 @@ public class JaxbEntryConverterServiceTest {
 		entries.add(null);
 
 		final StringWriter writer = new StringWriter();
-		when(fileStore.getFileDataWriterByName(OUT_XML_FILE_NAME)).thenReturn(new BufferedWriter(writer));
+		when(fileRepository.getFileDataWriterByName(OUT_XML_FILE_NAME)).thenReturn(new BufferedWriter(writer));
 		when(entryRepository.getEntriesFromRange(anyInt(), anyInt()))
 				.thenAnswer(AdditionalAnswers.returnsElementsOf(entries));
 
@@ -70,15 +70,15 @@ public class JaxbEntryConverterServiceTest {
 		}
 		expectedEntriesXml.append("</entries>");
 
-		converterService.convertEntriesToXml(entryRepository, fileStore, OUT_XML_FILE_NAME, BATCH_SIZE);
+		converterService.convertEntriesToXml(entryRepository, fileRepository, OUT_XML_FILE_NAME, BATCH_SIZE);
 
-		verify(fileStore).getFileDataWriterByName(OUT_XML_FILE_NAME);
+		verify(fileRepository).getFileDataWriterByName(OUT_XML_FILE_NAME);
 		verify(entryRepository).getEntriesFromRange(1, 3);
 		verify(entryRepository).getEntriesFromRange(4, 6);
 		verify(entryRepository).getEntriesFromRange(7, 9);
 		verify(entryRepository).getEntriesFromRange(10, 12);
 		verify(entryRepository).getEntriesFromRange(13, 15);
-		verifyNoMoreInteractions(fileStore, entryRepository);
+		verifyNoMoreInteractions(fileRepository, entryRepository);
 		assertThat(writer.toString(), equalTo(expectedEntriesXml.toString()));
 	}
 
@@ -86,7 +86,7 @@ public class JaxbEntryConverterServiceTest {
 	public void testConvertEvenEntriesToXmlOk() throws Exception {
 		EntryConverterService converterService = new JaxbEntryConverterService();
 		EntryRepository entryRepository = mock(EntryRepository.class);
-		FileStore fileStore = mock(FileStore.class);
+		FileRepository fileRepository = mock(FileRepository.class);
 
 		List<List<Entry>> entries = new ArrayList<>();
 		int counter = 1;
@@ -102,7 +102,7 @@ public class JaxbEntryConverterServiceTest {
 		entries.add(null);
 
 		final StringWriter writer = new StringWriter();
-		when(fileStore.getFileDataWriterByName(OUT_XML_FILE_NAME)).thenReturn(new BufferedWriter(writer));
+		when(fileRepository.getFileDataWriterByName(OUT_XML_FILE_NAME)).thenReturn(new BufferedWriter(writer));
 		when(entryRepository.getEntriesFromRange(anyInt(), anyInt()))
 				.thenAnswer(AdditionalAnswers.returnsElementsOf(entries));
 
@@ -112,15 +112,15 @@ public class JaxbEntryConverterServiceTest {
 		}
 		expectedEntriesXml.append("</entries>");
 
-		converterService.convertEntriesToXml(entryRepository, fileStore, OUT_XML_FILE_NAME, BATCH_SIZE);
+		converterService.convertEntriesToXml(entryRepository, fileRepository, OUT_XML_FILE_NAME, BATCH_SIZE);
 
-		verify(fileStore).getFileDataWriterByName(OUT_XML_FILE_NAME);
+		verify(fileRepository).getFileDataWriterByName(OUT_XML_FILE_NAME);
 		verify(entryRepository).getEntriesFromRange(1, 3);
 		verify(entryRepository).getEntriesFromRange(4, 6);
 		verify(entryRepository).getEntriesFromRange(7, 9);
 		verify(entryRepository).getEntriesFromRange(10, 12);
 		verify(entryRepository).getEntriesFromRange(13, 15);
-		verifyNoMoreInteractions(fileStore, entryRepository);
+		verifyNoMoreInteractions(fileRepository, entryRepository);
 		assertThat(writer.toString(), equalTo(expectedEntriesXml.toString()));
 	}
 
@@ -133,8 +133,8 @@ public class JaxbEntryConverterServiceTest {
 	@Test
 	public void testTransformEntriesXmlOk() throws Exception {
 		EntryConverterService converterService = new JaxbEntryConverterService();
-		FileStore fileStore = mock(FileStore.class);
-		String xslt = getResourceFileAsString("/1to2.xslt");
+		FileRepository fileRepository = mock(FileRepository.class);
+		String xslt = getResourceFileAsString("/" + XSLT_FILE_NAME);
 
 		final String inEntriesXml =
 				"<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
@@ -158,13 +158,13 @@ public class JaxbEntryConverterServiceTest {
 		StringWriter tmpXmlWriterFirstBatch = new StringWriter();
 		StringWriter tmpXmlWriterSecondBatch = new StringWriter();
 		final BufferedReader xsltReaderSpy = spy(new BufferedReader(new StringReader(xslt)));
-		when(fileStore.getFileDataReaderByName(XSLT_FILE_NAME)).thenReturn(xsltReaderSpy);
+		when(fileRepository.getFileDataReaderByName(XSLT_FILE_NAME)).thenReturn(xsltReaderSpy);
 		final BufferedReader inEntriesXmlReaderSpy = spy(new BufferedReader(new StringReader(inEntriesXml)));
-		when(fileStore.getFileDataReaderByName(IN_XML_FILE_NAME)).thenReturn(inEntriesXmlReaderSpy);
+		when(fileRepository.getFileDataReaderByName(IN_XML_FILE_NAME)).thenReturn(inEntriesXmlReaderSpy);
 		final BufferedWriter actualOutEntriesXmlSpy = spy(new BufferedWriter(actualOutEntriesXml));
-		when(fileStore.getFileDataWriterByName(OUT_XML_FILE_NAME)).thenReturn(actualOutEntriesXmlSpy);
+		when(fileRepository.getFileDataWriterByName(OUT_XML_FILE_NAME)).thenReturn(actualOutEntriesXmlSpy);
 		final BufferedWriter tmpXmlWriterSpy = spy(new BufferedWriter(tmpXmlWriterFirstBatch));
-		when(fileStore.getFileDataWriterByName(TMP_XML_FILE_NAME)).thenReturn(tmpXmlWriterSpy)
+		when(fileRepository.getFileDataWriterByName(TMP_XML_FILE_NAME)).thenReturn(tmpXmlWriterSpy)
 		.thenReturn(new BufferedWriter(tmpXmlWriterSecondBatch));
 		doAnswer(new Answer<BufferedReader>() {
 			private int callCount = 1;
@@ -177,16 +177,16 @@ public class JaxbEntryConverterServiceTest {
 					return new BufferedReader(new StringReader(tmpXmlWriterSecondBatch.toString()));
 				}
 			}
-		}).when(fileStore).getFileDataReaderByName(TMP_XML_FILE_NAME);
+		}).when(fileRepository).getFileDataReaderByName(TMP_XML_FILE_NAME);
 
 	    converterService.transformEntriesXml(
-	    		fileStore, XSLT_FILE_NAME, IN_XML_FILE_NAME, OUT_XML_FILE_NAME, TMP_XML_FILE_NAME, BATCH_SIZE);
+			fileRepository, XSLT_FILE_NAME, IN_XML_FILE_NAME, OUT_XML_FILE_NAME, TMP_XML_FILE_NAME, BATCH_SIZE);
 
-	    verify(fileStore).getFileDataReaderByName(XSLT_FILE_NAME);
-	    verify(fileStore).getFileDataReaderByName(IN_XML_FILE_NAME);
-	    verify(fileStore).getFileDataWriterByName(OUT_XML_FILE_NAME);
-	    verify(fileStore, times(2)).getFileDataReaderByName(TMP_XML_FILE_NAME);
-	    verify(fileStore, times(2)).getFileDataWriterByName(TMP_XML_FILE_NAME);
+	    verify(fileRepository).getFileDataReaderByName(XSLT_FILE_NAME);
+	    verify(fileRepository).getFileDataReaderByName(IN_XML_FILE_NAME);
+	    verify(fileRepository).getFileDataWriterByName(OUT_XML_FILE_NAME);
+	    verify(fileRepository, times(2)).getFileDataReaderByName(TMP_XML_FILE_NAME);
+	    verify(fileRepository, times(2)).getFileDataWriterByName(TMP_XML_FILE_NAME);
 
 	    verify(xsltReaderSpy, times(3)).read(anyObject(), anyInt(), anyInt());
 		verify(xsltReaderSpy, times(2)).close();
@@ -195,7 +195,7 @@ public class JaxbEntryConverterServiceTest {
 	    verify(actualOutEntriesXmlSpy, times(10)).write(anyString(), anyInt(), anyInt());
 	    verify(tmpXmlWriterSpy, times(29)).write(anyString(), anyInt(), anyInt());
 	    verify(tmpXmlWriterSpy, times(18)).flush();
-	    verifyNoMoreInteractions(fileStore, xsltReaderSpy, inEntriesXmlReaderSpy);
+	    verifyNoMoreInteractions(fileRepository, xsltReaderSpy, inEntriesXmlReaderSpy);
 	    assertThat(actualOutEntriesXml.toString(), equalTo(expectedOutEntriesXml));
 	}
 

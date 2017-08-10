@@ -1,6 +1,4 @@
 dependencies {
     compile project(':testtask-interfaces')
     compile project(':testtask-entry-impl')
-
-    testCompile(libraries.mockito)
 }

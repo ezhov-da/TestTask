@@ -8,9 +8,6 @@ import org.hamcrest.*;
 import org.junit.Test;
 
 /**
- * @version 1.0 2017
- * @author Evgeny Dobrokvashin
- * Created by Stalker on 18.07.2017.
  */
 public class EntryTest {
 	@Test

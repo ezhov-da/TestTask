@@ -11,20 +11,19 @@ import javax.xml.parsers.*;
 import java.io.*;
 
 /**
- * Класс SingleThreadCalculator
- *
+ * Однопоточная реализация сервиса вычислителя
  */
 public class SingleThreadCalculator implements Calculator {
 	@Override
-	public long getSumOfEntriesDataFrom(FileStore fileStore, String srcFileName) throws CalculatorException {
-		try(BufferedReader srcReader = fileStore.getFileDataReaderByName(srcFileName)) {
+	public long getSumOfEntriesDataFrom(FileRepository fileRepository, String srcFileName) throws CalculatorException {
+		try(BufferedReader srcReader = fileRepository.getFileDataReaderByName(srcFileName)) {
 			SAXParserFactory factory = SAXParserFactory.newInstance();
 			SAXParser saxParser = factory.newSAXParser();
 
 			ParseXmlSAXHandler handler = new ParseXmlSAXHandler();
 			saxParser.parse(new InputSource(srcReader), handler);
 			return handler.getSum();
-		} catch (FileStoreException | SAXException | ParserConfigurationException | IOException e) {
+		} catch (FileRepositoryException | SAXException | ParserConfigurationException | IOException e) {
 			throw new CalculatorException(e);
 		}
 	}
