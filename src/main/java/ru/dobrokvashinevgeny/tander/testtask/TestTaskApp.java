@@ -21,6 +21,7 @@ public class TestTaskApp {
 
 	public TestTaskApp(AppConfig appConfig) {
 		this.appConfig = appConfig;
+		System.out.println("n = " + appConfig.getN());
 		LOG.log(Level.INFO, "n = " + appConfig.getN() + ", batchSize = " + appConfig.getBatchSize());
 	}
 
