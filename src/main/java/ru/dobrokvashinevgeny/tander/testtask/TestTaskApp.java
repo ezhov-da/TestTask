@@ -10,9 +10,7 @@ import ru.dobrokvashinevgeny.tander.testtask.service.*;
 import java.util.logging.*;
 
 /**
- * Класс TestTaskApp
- *
- * @version 1.0
+ * Приложение TestTaskApp
  */
 public class TestTaskApp {
 	private final static Logger LOG = Logger.getLogger(Main.class.getName());
