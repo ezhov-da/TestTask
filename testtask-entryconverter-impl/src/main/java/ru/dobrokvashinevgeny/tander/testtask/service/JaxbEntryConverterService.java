@@ -32,7 +32,7 @@ public class JaxbEntryConverterService implements EntryConverterService {
 			long currentEntryId = 1;
 			List<Entry> entries =
 					entryRepository.getEntriesFromRange(currentEntryId, getToEntryId(batchSize, currentEntryId));
-			while (null != entries) {
+			while (null != entries && entries.size() > 0) {
 				destXmlWriter.write(marshalEntriesBatchToXml(entries, marshaller));
 
 				currentEntryId += batchSize;
@@ -75,7 +75,17 @@ public class JaxbEntryConverterService implements EntryConverterService {
 		destXmlWriter.write("</entries>");
 	}
 
-	private class TransformEntriesXml {
+	@Override
+	public void transformEntriesXml(FileRepository fileRepository, String xsltTemplateFileName, String srcEntriesXmlFileName,
+									String destXmlFileName, String tmpXmlFileName, int batchSize)
+			throws EntryConverterServiceException {
+		new TransformEntriesXmlByBatch(
+			fileRepository, xsltTemplateFileName, srcEntriesXmlFileName,
+			destXmlFileName, tmpXmlFileName, batchSize
+		).execute();
+	}
+
+	private class TransformEntriesXmlByBatch {
 		private final FileRepository fileRepository;
 		private final String xsltTemplateFileName;
 		private final String srcEntriesXmlFileName;
@@ -84,16 +94,17 @@ public class JaxbEntryConverterService implements EntryConverterService {
 		private final int batchSize;
 		private XMLEventFactory eventFactory;
 		private XMLEventWriter destEventWriter;
-		private int elementCounter;
+		private int entryCounter;
 		private TransformerFactory transformerFactory;
 		private Transformer transformer;
 		private XMLInputFactory xmlInputFactory;
 		private XMLOutputFactory xmlOutputFactory;
 		private XMLEventWriter tmpEventWriter;
 		private BufferedWriter tmpXmlWriter;
+		private boolean isNotStopProcessSrcXml = true;
 
-		public TransformEntriesXml(FileRepository fileRepository, String xsltTemplateFileName, String srcEntriesXmlFileName,
-								   String destXmlFileName, String tmpXmlFileName, int batchSize) {
+		public TransformEntriesXmlByBatch(FileRepository fileRepository, String xsltTemplateFileName, String srcEntriesXmlFileName,
+										  String destXmlFileName, String tmpXmlFileName, int batchSize) {
 			this.fileRepository = fileRepository;
 			this.xsltTemplateFileName = xsltTemplateFileName;
 			this.srcEntriesXmlFileName = srcEntriesXmlFileName;
@@ -110,41 +121,10 @@ public class JaxbEntryConverterService implements EntryConverterService {
 				BufferedReader xsltTemplateReader = fileRepository.getFileDataReaderByName(xsltTemplateFileName)) {
 				initTransformerFrom(xsltTemplateReader);
 
-				XMLEventReader srcEventReader = xmlInputFactory.createXMLEventReader(srcXmlReader);
-				destEventWriter = xmlOutputFactory.createXMLEventWriter(destXmlWriter);
-
-				writeStartDocumentToDest(destEventWriter);
-
-				elementCounter = 0;
-				try {
-					while (srcEventReader.hasNext()) {
-						writeSrcXmlEventToDestThroughTmp(srcEventReader.nextEvent(), destEventWriter);
-					}
-
-					if (elementCounter <= batchSize) {
-						writeEndDocumentToDest(tmpEventWriter);
-						transformEntriesXmlFromTmpToDest(destEventWriter);
-					}
-				} finally {
-					if (null != tmpEventWriter) {
-						tmpEventWriter.close();
-					}
-
-					if (null != tmpXmlWriter) {
-						tmpXmlWriter.close();
-					}
-				}
-
-				writeEndDocumentToDest(destEventWriter);
+				transformXmlFromSrcToDest(srcXmlReader, destXmlWriter);
 			} catch (XMLStreamException | FileRepositoryException | IOException | TransformerException e) {
 				throw new EntryConverterServiceException(e);
 			}
-		}
-
-		private void initTransformerFrom(BufferedReader xsltTemplateReader) throws TransformerConfigurationException {
-			transformer = transformerFactory.newTransformer(new StreamSource(xsltTemplateReader));
-			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-			transformer.setOutputProperty(javax.xml.transform.OutputKeys.INDENT, "no");
 		}
 
 		private void intFactories() {
@@ -155,6 +135,35 @@ public class JaxbEntryConverterService implements EntryConverterService {
 			transformerFactory = TransformerFactory.newInstance();
 		}
 
+		private void initTransformerFrom(BufferedReader xsltTemplateReader) throws TransformerConfigurationException {
+			transformer = transformerFactory.newTransformer(new StreamSource(xsltTemplateReader));
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			transformer.setOutputProperty(javax.xml.transform.OutputKeys.INDENT, "no");
+		}
+
+		private void transformXmlFromSrcToDest(BufferedReader srcXmlReader, BufferedWriter destXmlWriter) throws XMLStreamException, EntryConverterServiceException, FileRepositoryException, IOException {
+			XMLEventReader srcEventReader = xmlInputFactory.createXMLEventReader(srcXmlReader);
+			destEventWriter = xmlOutputFactory.createXMLEventWriter(destXmlWriter);
+
+			writeStartDocumentToDest(destEventWriter);
+
+			try {
+				while (srcEventReader.hasNext() && isNotStopProcessSrcXml) {
+					processSrcXmlEvent(srcEventReader.nextEvent(), destEventWriter);
+				}
+			} finally {
+				if (null != tmpEventWriter) {
+					tmpEventWriter.close();
+				}
+
+				if (null != tmpXmlWriter) {
+					tmpXmlWriter.close();
+				}
+			}
+
+			writeEndDocumentToDest(destEventWriter);
+		}
+
 		private void writeStartDocumentToDest(XMLEventWriter destEventWriter)
 			throws XMLStreamException {
 			destEventWriter.add(eventFactory.createStartDocument());
@@ -162,37 +171,20 @@ public class JaxbEntryConverterService implements EntryConverterService {
 			destEventWriter.flush();
 		}
 
-		private void writeSrcXmlEventToDestThroughTmp(XMLEvent event, XMLEventWriter destEventWriter)
+		private void processSrcXmlEvent(XMLEvent event, XMLEventWriter destEventWriter)
 			throws XMLStreamException, EntryConverterServiceException, FileRepositoryException, IOException {
-			if (isStartNewBatch(event)) {
-				tmpXmlWriter = fileRepository.getFileDataWriterByName(tmpXmlFileName);
-				tmpEventWriter = xmlOutputFactory.createXMLEventWriter(tmpXmlWriter);
-				writeStartDocumentToDest(tmpEventWriter);
-			}
-
 			switch (event.getEventType()) {
 				case XMLStreamConstants.START_ELEMENT:
-					if (isEntryStartElement(event)) {
-						if (elementCounter++ == batchSize) {
-							writeEndDocumentToDest(tmpEventWriter);
-							tmpEventWriter.close();
-							tmpXmlWriter.close();
-							transformEntriesXmlFromTmpToDest(destEventWriter);
+					if (isEntriesStartElement(event)) {
+						entryCounter = 0;
+					} else if (isEntryStartElement(event)) {
+						if (0 == entryCounter) {
 							tmpXmlWriter = fileRepository.getFileDataWriterByName(tmpXmlFileName);
-							tmpXmlWriter.write("");
-							tmpXmlWriter.flush();
 							tmpEventWriter = xmlOutputFactory.createXMLEventWriter(tmpXmlWriter);
 							writeStartDocumentToDest(tmpEventWriter);
-							elementCounter = 0;
 						}
-					}
-
-					if (isNotEntriesStartElement(event)) {
 						writeXmlDataToTmp(tmpEventWriter, event);
-					}
-					break;
-				case XMLStreamConstants.END_ELEMENT:
-					if (isNotEntriesEndElement(event)) {
+					} else {
 						writeXmlDataToTmp(tmpEventWriter, event);
 					}
 					break;
@@ -200,16 +192,39 @@ public class JaxbEntryConverterService implements EntryConverterService {
 				case XMLStreamConstants.SPACE:
 					writeXmlDataToTmp(tmpEventWriter, event);
 					break;
+				case XMLStreamConstants.END_ELEMENT:
+				if (isEntryEndElement(event)) {
+					writeXmlDataToTmp(tmpEventWriter, event);
+					if (++entryCounter == batchSize) {
+						entryCounter = 0;
+						writeEndDocumentToDest(tmpEventWriter);
+						tmpEventWriter.close();
+						tmpXmlWriter.close();
+						transformEntriesXmlFromTmpToDest(destEventWriter);
+					}
+				} else if (isEntriesEndElement(event)) {
+					if (entryCounter > 0) {
+						writeEndDocumentToDest(tmpEventWriter);
+						tmpEventWriter.close();
+						tmpXmlWriter.close();
+						transformEntriesXmlFromTmpToDest(destEventWriter);
+					}
+					isNotStopProcessSrcXml = false;
+				} else {
+					writeXmlDataToTmp(tmpEventWriter, event);
+				}
+				break;
 			}
-		}
-
-		private boolean isStartNewBatch(XMLEvent event) {
-			return 0 == elementCounter && isEntryStartElement(event);
 		}
 
 		private boolean isEntryStartElement(XMLEvent event) {
 			return event.isStartElement() &&
 				event.asStartElement().getName().equals(new QName("entry"));
+		}
+
+		private boolean isEntryEndElement(XMLEvent event) {
+			return event.isEndElement() &&
+				event.asEndElement().getName().equals(new QName("entry"));
 		}
 
 		private void writeEndDocumentToDest(XMLEventWriter destEventWriter)
@@ -232,8 +247,8 @@ public class JaxbEntryConverterService implements EntryConverterService {
 			}
 		}
 
-		private boolean isNotEntriesStartElement(XMLEvent event) {
-			return !event.asStartElement().getName().equals(new QName("entries"));
+		private boolean isEntriesStartElement(XMLEvent event) {
+			return event.asStartElement().getName().equals(new QName("entries"));
 		}
 
 		private void writeXmlDataToTmp(XMLEventWriter tmpEventWriter, XMLEvent event) throws XMLStreamException {
@@ -241,18 +256,8 @@ public class JaxbEntryConverterService implements EntryConverterService {
 			tmpEventWriter.flush();
 		}
 
-		private boolean isNotEntriesEndElement(XMLEvent event) {
-			return !event.asEndElement().getName().equals(new QName("entries"));
+		private boolean isEntriesEndElement(XMLEvent event) {
+			return event.asEndElement().getName().equals(new QName("entries"));
 		}
-	}
-
-	@Override
-	public void transformEntriesXml(FileRepository fileRepository, String xsltTemplateFileName, String srcEntriesXmlFileName,
-									String destXmlFileName, String tmpXmlFileName, int batchSize)
-			throws EntryConverterServiceException {
-		new TransformEntriesXml(
-			fileRepository, xsltTemplateFileName, srcEntriesXmlFileName,
-			destXmlFileName, tmpXmlFileName, batchSize
-		).execute();
 	}
 }

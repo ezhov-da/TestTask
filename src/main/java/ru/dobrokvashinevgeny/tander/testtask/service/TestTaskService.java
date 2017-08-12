@@ -4,7 +4,7 @@
 
 package ru.dobrokvashinevgeny.tander.testtask.service;
 
-import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.EntryRepository;
+import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.*;
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.generator.EntryGenerator;
 import ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence.DataSource;
 
@@ -43,6 +43,8 @@ public class TestTaskService {
 	 */
 	public long calculateSumOfEntriesData() throws TestTaskServiceException {
 		try {
+			initEntryRepositoryStructure();
+
 			transferFromGeneratorToRepository();
 
 			convertEntriesToXml();
@@ -50,9 +52,15 @@ public class TestTaskService {
 			transformEntriesXml();
 
 			return getSumOfEntriesData();
-		} catch (EntryTransferException | CalculatorException | EntryConverterServiceException e) {
+		} catch (EntryTransferException | CalculatorException | EntryConverterServiceException |
+			EntryRepositoryException e) {
 			throw new TestTaskServiceException(e);
 		}
+	}
+
+	private void initEntryRepositoryStructure() throws TestTaskServiceException, EntryRepositoryException {
+		final EntryRepository entryRepository = createEntryRepository(dataSource);
+		entryRepository.createDataStructure();
 	}
 
 	private void transferFromGeneratorToRepository()

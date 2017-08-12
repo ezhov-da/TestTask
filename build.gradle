@@ -39,6 +39,8 @@ dependencies {
     compile project(':testtask-entryrepository-impl')
     compile project(':testtask-entrytransfer-impl')
     compile project(':testtask-entryconverter-impl')
+    compile project(':testtask-filerepository-impl')
+    compile project(':testtask-calculator-impl')
 
     compile(libraries.h2)
 }

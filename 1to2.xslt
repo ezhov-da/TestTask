@@ -3,9 +3,7 @@
   <xsl:output method="xml" indent="yes"/>
 
   <xsl:template match="entries">
-    <entries>
       <xsl:apply-templates/>
-    </entries>
   </xsl:template>
 
   <xsl:template match="entry">

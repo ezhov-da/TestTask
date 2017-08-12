@@ -3,3 +3,7 @@
 build
 libs
 out
+/1.xml
+/2.xml
+/tmp.xml
+/logs/main.log.*

@@ -7,17 +7,21 @@ package ru.dobrokvashinevgeny.tander.testtask;
 import ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence.*;
 import ru.dobrokvashinevgeny.tander.testtask.service.*;
 
+import java.util.logging.*;
+
 /**
  * Класс TestTaskApp
  *
  * @version 1.0
  */
 public class TestTaskApp {
+	private final static Logger LOG = Logger.getLogger(Main.class.getName());
 	private DataSource dataSource;
 	private AppConfig appConfig;
 
 	public TestTaskApp(AppConfig appConfig) {
 		this.appConfig = appConfig;
+		LOG.log(Level.INFO, "n = " + appConfig.getN() + ", batchSize = " + appConfig.getBatchSize());
 	}
 
 	/**

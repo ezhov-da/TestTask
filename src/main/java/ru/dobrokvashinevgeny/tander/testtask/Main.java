@@ -15,10 +15,11 @@ import java.util.logging.*;
  */
 public class Main {
 	private final static String LOG_CFG_FILE_NAME = "/logging.properties";
-	private final static String APP_CONFIG_FILE_NAME = "appConfig.properties";
+	private final static String APP_CONFIG_FILE_NAME = "app.properties";
 	private final static Logger LOG = Logger.getLogger(Main.class.getName());
 
 	public static void main(String[] args) {
+		long beginTime = System.currentTimeMillis();
 		configureLogger();
 
 		try {
@@ -28,6 +29,7 @@ public class Main {
 			long sumOfEntries = testTaskService.calculateSumOfEntriesData();
 
 			System.out.println("Sum of Entries = " + sumOfEntries);
+			LOG.log(Level.INFO, "Work time: " + (System.currentTimeMillis() - beginTime) + " ms.");
 		} catch (AppConfigurationException | TestTaskServiceException e) {
 			processGeneralException(e);
 		}

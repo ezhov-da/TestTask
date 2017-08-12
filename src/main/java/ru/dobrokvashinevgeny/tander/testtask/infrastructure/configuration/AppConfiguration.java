@@ -53,14 +53,14 @@ public class AppConfiguration implements AppConfig {
 	public void configure() throws AppConfigurationException {
 		Properties appProperties = getProperties();
 		try {
-			n = Long.parseLong(appProperties.getProperty("entity.repository.url"));
+			n = Long.parseLong(appProperties.getProperty("testTask.n"));
 		} catch (NumberFormatException e) {
 			throw new AppConfigurationException(e);
 		}
 
-		connectionUrl = appProperties.getProperty("entity.repository.url");
-		userName = appProperties.getProperty("entity.repository.userName");
-		userPsw = appProperties.getProperty("entity.repository.userPsw");
+		connectionUrl = appProperties.getProperty("entry.repository.url");
+		userName = appProperties.getProperty("entry.repository.userName");
+		userPsw = appProperties.getProperty("entry.repository.userPsw");
 
 		try {
 			batchSize = Integer.parseInt(appProperties.getProperty("batchSize"));
