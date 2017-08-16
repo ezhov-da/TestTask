@@ -5,13 +5,13 @@
 package ru.dobrokvashinevgeny.tander.testtask.infrastructure.generator;
 
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.*;
-import ru.dobrokvashinevgeny.tander.testtask.domain.model.generator.EntryGenerator;
+import ru.dobrokvashinevgeny.tander.testtask.service.generator.EntryGenerator;
 
 /**
  * Реализация генератора Entries в памяти
  */
 public class MemoryEntryGenerator implements EntryGenerator {
-	private Long priorValue = 0L;
+	private Long currentValue = 1L;
 
 	@Override
 	public Entry getNewEntry() {
@@ -19,6 +19,13 @@ public class MemoryEntryGenerator implements EntryGenerator {
 	}
 
 	private long getNewValue() {
-		return ++priorValue;
+		return currentValue++;
+	}
+
+	/**
+	 * Устанавливает текущее значение генератора
+	 */
+	public void setCurrentValue(Long currentValue) {
+		this.currentValue = currentValue;
 	}
 }

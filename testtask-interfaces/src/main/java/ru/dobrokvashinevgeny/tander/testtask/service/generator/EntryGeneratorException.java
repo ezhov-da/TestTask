@@ -1,4 +1,4 @@
-package ru.dobrokvashinevgeny.tander.testtask.domain.model.generator;
+package ru.dobrokvashinevgeny.tander.testtask.service.generator;
 
 /**
  * @author Evgeny Dobrokvashin

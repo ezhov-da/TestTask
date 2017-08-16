@@ -10,10 +10,11 @@ import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.*;
 import java.sql.*;
 import java.util.List;
 
+import static ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence.EntryTable.FIELD_NAME;
+import static ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence.EntryTable.TABLE_NAME;
+
 /**
  * Класс EntryMapper
- *
- * @version 1.0
  */
 public class EntryMapper extends AbstractMapper {
 	public List<Entry> findByRange(long from, long to) throws MapperException {
@@ -31,7 +32,9 @@ public class EntryMapper extends AbstractMapper {
 
 		@Override
 		public String sql() {
-			return "select field from (select field from Test order by field) where field between ? and ?";
+			return "select " + FIELD_NAME +
+				" from (select " + FIELD_NAME + " from " + TABLE_NAME + " order by " + FIELD_NAME + ") " +
+				"where " + FIELD_NAME + " between ? and ?";
 		}
 
 		@Override
@@ -41,18 +44,7 @@ public class EntryMapper extends AbstractMapper {
 	}
 
 	@Override
-	protected String insertSql() {
-		return "insert into Test(field) values(?)";
-	}
-
-	@Override
 	protected DomainObject domainObjectFromResultSet(ResultSet rs) throws SQLException {
 		return new EntryImpl(rs.getLong(1));
-	}
-
-	@Override
-	protected void doInsert(DomainObject domainObject, PreparedStatement batchStatement) throws SQLException {
-		Entry entry = (Entry) domainObject;
-		batchStatement.setLong(1, entry.getValue());
 	}
 }

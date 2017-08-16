@@ -7,7 +7,7 @@ package ru.dobrokvashinevgeny.tander.testtask.infrastructure.generator;
 import org.hamcrest.*;
 import org.junit.Test;
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.*;
-import ru.dobrokvashinevgeny.tander.testtask.domain.model.generator.EntryGenerator;
+import ru.dobrokvashinevgeny.tander.testtask.service.generator.EntryGenerator;
 
 import java.util.*;
 

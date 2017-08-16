@@ -33,7 +33,7 @@ public class JaxbEntryConverterService implements EntryConverterService {
 			List<Entry> entries =
 					entryRepository.getEntriesFromRange(currentEntryId, getToEntryId(batchSize, currentEntryId));
 			while (null != entries && entries.size() > 0) {
-				destXmlWriter.write(marshalEntriesBatchToXml(entries, marshaller));
+				marshalEntriesBatchToDest(marshaller, entries, destXmlWriter);
 
 				currentEntryId += batchSize;
 				entries = entryRepository.getEntriesFromRange(currentEntryId, getToEntryId(batchSize, currentEntryId));
@@ -62,13 +62,13 @@ public class JaxbEntryConverterService implements EntryConverterService {
 		return currentEntryId + batchSize - 1;
 	}
 
-	private String marshalEntriesBatchToXml(List<Entry> entries, Marshaller marshaller) throws JAXBException {
-		StringWriter result = new StringWriter();
+	private void marshalEntriesBatchToDest(Marshaller marshaller, List<Entry> entries, BufferedWriter destXmlWriter)
+		throws JAXBException, IOException {
 		for (Entry entry : entries) {
-			marshaller.marshal(entry, result);
+			marshaller.marshal(entry, destXmlWriter);
 		}
-		result.flush();
-		return result.toString();
+
+		destXmlWriter.flush();
 	}
 
 	private void writeFooterTo(BufferedWriter destXmlWriter) throws IOException {

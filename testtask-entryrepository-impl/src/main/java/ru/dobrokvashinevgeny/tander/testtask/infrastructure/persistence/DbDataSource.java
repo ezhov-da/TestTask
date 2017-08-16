@@ -4,6 +4,8 @@
 
 package ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence;
 
+import ru.dobrokvashinevgeny.tander.testtask.domain.model.DataSource;
+
 import java.sql.*;
 
 /**

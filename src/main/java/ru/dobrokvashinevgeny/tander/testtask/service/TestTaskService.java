@@ -4,9 +4,9 @@
 
 package ru.dobrokvashinevgeny.tander.testtask.service;
 
-import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.*;
-import ru.dobrokvashinevgeny.tander.testtask.domain.model.generator.EntryGenerator;
-import ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence.DataSource;
+import ru.dobrokvashinevgeny.tander.testtask.domain.model.DataSource;
+import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.EntryRepository;
+import ru.dobrokvashinevgeny.tander.testtask.service.generator.EntryGenerator;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -53,22 +53,21 @@ public class TestTaskService {
 
 			return getSumOfEntriesData();
 		} catch (EntryTransferException | CalculatorException | EntryConverterServiceException |
-			EntryRepositoryException e) {
+			EntryServiceException e) {
 			throw new TestTaskServiceException(e);
 		}
 	}
 
-	private void initEntryRepositoryStructure() throws TestTaskServiceException, EntryRepositoryException {
-		final EntryRepository entryRepository = createEntryRepository(dataSource);
-		entryRepository.createDataStructure();
+	protected void initEntryRepositoryStructure() throws EntryServiceException {
+		final EntryService entryService = new EntryService(dataSource);
+		entryService.createDataStructure();
 	}
 
 	private void transferFromGeneratorToRepository()
 		throws TestTaskServiceException, EntryTransferException {
 		final EntryGenerator entryGenerator = createEntryGenerator();
 		final EntryTransfer entryTransfer = createEntryTransfer();
-		final EntryRepository entryRepository = createEntryRepository(dataSource);
-		entryTransfer.transferFromGeneratorToRepository(entryGenerator, entryRepository, n, config.getBatchSize());
+		entryTransfer.transferFromGeneratorToRepository(entryGenerator, n, config.getBatchSize(), dataSource);
 	}
 
 	private EntryGenerator createEntryGenerator() throws TestTaskServiceException {

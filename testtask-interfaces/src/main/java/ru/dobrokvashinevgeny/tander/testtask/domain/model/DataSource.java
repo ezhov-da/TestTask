@@ -1,4 +1,4 @@
-package ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence;
+package ru.dobrokvashinevgeny.tander.testtask.domain.model;
 
 import java.sql.*;
 

@@ -6,8 +6,8 @@ package ru.dobrokvashinevgeny.tander.testtask.presentation;
 
 import org.junit.Test;
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.EntryRepository;
-import ru.dobrokvashinevgeny.tander.testtask.domain.model.generator.EntryGenerator;
-import ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence.DataSource;
+import ru.dobrokvashinevgeny.tander.testtask.service.generator.EntryGenerator;
+import ru.dobrokvashinevgeny.tander.testtask.domain.model.DataSource;
 import ru.dobrokvashinevgeny.tander.testtask.service.*;
 
 import static org.mockito.Mockito.mock;
@@ -81,6 +81,10 @@ public class TestTaskTestService {
 			}
 
 			@Override
+			protected void initEntryRepositoryStructure() throws EntryServiceException {
+			}
+
+			@Override
 			protected EntryRepository createEntryRepository(DataSource dataSource) throws TestTaskServiceException {
 				return entryRepository;
 			}
@@ -90,7 +94,7 @@ public class TestTaskTestService {
 
 		verify(entryTransfer)
 				.transferFromGeneratorToRepository(
-					entryGenerator, entryRepository, N, BATCH_SIZE);
+					entryGenerator, N, BATCH_SIZE, dataSource);
 		verify(converterService)
 			.convertEntriesToXml(entryRepository, fileRepository, IN_XML_FILE_NAME, BATCH_SIZE);
 		verify(converterService)

@@ -5,74 +5,65 @@
 package ru.dobrokvashinevgeny.tander.testtask.service;
 
 import org.junit.*;
-import org.mockito.*;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.*;
-import ru.dobrokvashinevgeny.tander.testtask.domain.model.generator.*;
+import org.mockito.InOrder;
+import ru.dobrokvashinevgeny.tander.testtask.domain.model.DataSource;
+import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.Entry;
+import ru.dobrokvashinevgeny.tander.testtask.service.generator.*;
 
-import java.util.*;
+import java.sql.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.*;
 
 /**
- * @version 1.0 2017
- * @author Evgeny Dobrokvashin
- * Created by Stalker on 18.07.2017.
  */
 public class EntryTransferTest {
 	private final int numberOfEntriesToTransfer = 5;
 	private final int entriesBatchSize = 2;
 
+	private PreparedStatement preparedStatement;
+	private DataSource dataSource;
 	private EntryTransfer entryTransfer;
 	private EntryGenerator generator;
-	private EntryRepository repository;
 
 	@Before
 	public void setUp() throws Exception {
+		preparedStatement = mock(PreparedStatement.class);
+		Connection connection = mock(Connection.class);
+		when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
+		dataSource = mock(DataSource.class);
+		when(dataSource.getConnection()).thenReturn(connection);
 		entryTransfer = new SingleThreadEntryTransfer();
-		generator = Mockito.mock(EntryGenerator.class);
-		repository = Mockito.mock(EntryRepository.class);
+		generator = mock(EntryGenerator.class);
 	}
 
 	@Test
 	public void testTransferFromGeneratorToRepositoryOk() throws Exception {
-		List<Integer> entriesSizes = new ArrayList<>();
-		doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock invocation) throws Throwable {
-				Object[] arguments = invocation.getArguments();
-				if (null != arguments && arguments.length == 1 && null != arguments[0]) {
-					List<Entry> entries = (List<Entry>) arguments[0];
-					entriesSizes.add(entries.size());
-				}
-
-				return null;
-			}
-		}).when(repository).putEntries(anyListOf(Entry.class));
-
+		Entry entry = mock(Entry.class);
+		when(generator.getNewEntry()).thenReturn(entry, entry, entry, entry, entry);
 
 		entryTransfer.transferFromGeneratorToRepository(
-				generator, repository, numberOfEntriesToTransfer, entriesBatchSize
-		);
+				generator, numberOfEntriesToTransfer, entriesBatchSize, dataSource);
 
-		InOrder inOrder = inOrder(generator, repository);
-		inOrder.verify(generator, times(entriesBatchSize)).getNewEntry();
-		inOrder.verify(repository).putEntries(anyListOf(Entry.class));
-		inOrder.verify(generator, times(entriesBatchSize)).getNewEntry();
-		inOrder.verify(repository).putEntries(anyListOf(Entry.class));
+		InOrder inOrder = inOrder(generator, preparedStatement);
 		inOrder.verify(generator).getNewEntry();
-		inOrder.verify(repository).putEntries(anyListOf(Entry.class));
+		inOrder.verify(preparedStatement).setLong(anyInt(), anyLong());
+		inOrder.verify(preparedStatement).addBatch();
+		inOrder.verify(generator).getNewEntry();
+		inOrder.verify(preparedStatement).setLong(anyInt(), anyLong());
+		inOrder.verify(preparedStatement).addBatch();
+		inOrder.verify(generator).getNewEntry();
+		inOrder.verify(preparedStatement).setLong(anyInt(), anyLong());
+		inOrder.verify(preparedStatement).addBatch();
+		inOrder.verify(generator).getNewEntry();
+		inOrder.verify(preparedStatement).setLong(anyInt(), anyLong());
+		inOrder.verify(preparedStatement).addBatch();
+		inOrder.verify(generator).getNewEntry();
+		inOrder.verify(preparedStatement).setLong(anyInt(), anyLong());
+		inOrder.verify(preparedStatement).addBatch();
+		inOrder.verify(preparedStatement).executeBatch();
+		inOrder.verify(preparedStatement).close();
 
-		assertEquals(entriesBatchSize, entriesSizes.get(0).intValue());
-		assertEquals(entriesBatchSize, entriesSizes.get(1).intValue());
-
-		final int sizeOfTheEntriesLastBatch = numberOfEntriesToTransfer % entriesBatchSize;
-		assertEquals(sizeOfTheEntriesLastBatch, entriesSizes.get(2).intValue());
-
-		verifyNoMoreInteractions(generator, repository);
+		verifyNoMoreInteractions(generator, preparedStatement);
 	}
 
 	@Test(expected = EntryTransferException.class)
@@ -82,31 +73,32 @@ public class EntryTransferTest {
 				.thenThrow(EntryGeneratorException.class);
 
 		entryTransfer.transferFromGeneratorToRepository(
-				generator, repository, numberOfEntriesToTransfer, entriesBatchSize
-		);
+			generator, numberOfEntriesToTransfer, entriesBatchSize,dataSource);
 
-		InOrder inOrder = inOrder(generator, repository);
+		InOrder inOrder = inOrder(generator);
 		inOrder.verify(generator).getNewEntry();
-		verifyNoMoreInteractions(generator, repository);
+		verifyNoMoreInteractions(generator);
 	}
 
 	@Test(expected = EntryTransferException.class)
-	public void testTransferFromGeneratorToRepositoryRepositoryFail() throws Exception {
+	public void testTransferFromGeneratorToRepositoryDBFail() throws Exception {
 		final Entry entry = mock(Entry.class);
 		when(generator.getNewEntry())
 				.thenReturn(entry)
 				.thenReturn(entry)
 				.thenReturn(entry);
-		doThrow(EntryRepositoryException.class)
-				.doNothing()
-				.when(repository).putEntries(anyListOf(Entry.class));
+		doThrow(SQLException.class)
+				.when(preparedStatement).executeBatch();
 
 		entryTransfer.transferFromGeneratorToRepository(
-				generator, repository, numberOfEntriesToTransfer, entriesBatchSize
-		);
+				generator, numberOfEntriesToTransfer, entriesBatchSize,
+			dataSource);
 
-		InOrder inOrder = inOrder(generator, repository);
+		InOrder inOrder = inOrder(generator, preparedStatement);
 		inOrder.verify(generator).getNewEntry();
-		verifyNoMoreInteractions(generator, repository);
+		inOrder.verify(preparedStatement).setLong(anyInt(), anyLong());
+		inOrder.verify(preparedStatement).addBatch();
+		inOrder.verify(preparedStatement).executeBatch();
+		verifyNoMoreInteractions(generator, preparedStatement);
 	}
 }

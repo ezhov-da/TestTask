@@ -11,13 +11,9 @@ import java.util.*;
 
 /**
  * Класс AbstractMapper
- *
- * @version 1.0
  */
 public abstract class AbstractMapper implements Mapper {
 	private Connection connection;
-
-	protected abstract String insertSql();
 
 	protected abstract <T extends DomainObject> T domainObjectFromResultSet(ResultSet rs)
 		throws SQLException;
@@ -46,23 +42,7 @@ public abstract class AbstractMapper implements Mapper {
 	}
 
 	@Override
-	public void insertWithBatch(List<? extends DomainObject> domainObjects) throws MapperException {
-		try(PreparedStatement batchStatement = connection.prepareStatement(insertSql())) {
-			for (DomainObject domainObject : domainObjects) {
-				doInsert(domainObject, batchStatement);
-				batchStatement.addBatch();
-			}
-
-			batchStatement.executeBatch();
-		} catch (SQLException e) {
-			throw new MapperException(e);
-		}
-	}
-
-	@Override
 	public void setConnection(Connection connection) {
 		this.connection = connection;
 	}
-
-	protected abstract void doInsert(DomainObject domainObject, PreparedStatement batchStatement) throws SQLException;
 }

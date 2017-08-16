@@ -13,8 +13,6 @@ import static org.mockito.Mockito.*;
 
 /**
  * Класс EntryMapperTest
- *
- * @version 1.0
  */
 public class EntryMapperTest {
 	@Test
@@ -53,16 +51,4 @@ public class EntryMapperTest {
 
 		assertThat(result, equalTo(new EntryImpl(1L)));
 	}
-
-	@Test
-	public void doInsertOk() throws Exception {
-		EntryMapper entryMapper = new EntryMapper();
-		PreparedStatement ps = mock(PreparedStatement.class);
-
-		entryMapper.doInsert(new EntryImpl(1L), ps);
-
-		verify(ps).setLong(1, 1L);
-		verifyNoMoreInteractions(ps);
-	}
-
 }
