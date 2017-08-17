@@ -61,7 +61,17 @@ public class TestTaskTestService {
 			}
 
 			@Override
+			public int getTransferBatchSize() {
+				return BATCH_SIZE;
+			}
+
+			@Override
 			public int getСonverterBatchSize() {
+				return BATCH_SIZE;
+			}
+
+			@Override
+			public int getTransformerBatchSize() {
 				return BATCH_SIZE;
 			}
 		};
