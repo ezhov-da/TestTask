@@ -29,7 +29,11 @@ public class AppConfiguration implements AppConfig {
 
 	private String userPsw;
 
-	private int batchSize;
+	private int converterBatchSize;
+
+	private int transformerBatchSize;
+
+	private int transferBatchSize;
 
 	private String entryGeneratorImplClassName;
 
@@ -61,13 +65,9 @@ public class AppConfiguration implements AppConfig {
 		connectionUrl = appProperties.getProperty("entry.repository.url");
 		userName = appProperties.getProperty("entry.repository.userName");
 		userPsw = appProperties.getProperty("entry.repository.userPsw");
-
-		try {
-			batchSize = Integer.parseInt(appProperties.getProperty("batchSize"));
-		} catch (NumberFormatException e) {
-			throw new AppConfigurationException(e);
-		}
-
+		transferBatchSize = getIntParamValue(appProperties, "transfer.batchSize");
+		transformerBatchSize = getIntParamValue(appProperties, "transformer.batchSize");
+		converterBatchSize = getIntParamValue(appProperties, "converter.batchSize");
 		entryGeneratorImplClassName = appProperties.getProperty("bean.entryGeneratorImpl.className");
 		entryRepositoryImplClassName = appProperties.getProperty("bean.entryRepositoryImpl.className");
 		entryTransferImplClassName = appProperties.getProperty("bean.entryTransferImpl.className");
@@ -75,6 +75,14 @@ public class AppConfiguration implements AppConfig {
 		fileRepositoryImplClassName = appProperties.getProperty("bean.fileStoreImpl.className");
 		calculatorImplClassName = appProperties.getProperty("bean.calculatorImpl.className");
 		dataSourceImplClassName = appProperties.getProperty("bean.dataSourceImpl.className");
+	}
+
+	private int getIntParamValue(Properties appProperties, String paramName) throws AppConfigurationException {
+		try {
+			return Integer.parseInt(appProperties.getProperty(paramName));
+		} catch (NumberFormatException e) {
+			throw new AppConfigurationException(e);
+		}
 	}
 
 	@Override
@@ -108,8 +116,18 @@ public class AppConfiguration implements AppConfig {
 	}
 
 	@Override
-	public int getBatchSize () {
-		return batchSize;
+	public int getTransferBatchSize() {
+		return transferBatchSize;
+	}
+
+	@Override
+	public int getСonverterBatchSize() {
+		return converterBatchSize;
+	}
+
+	@Override
+	public int getTransformerBatchSize() {
+		return transformerBatchSize;
 	}
 
 	private Properties getProperties() throws AppConfigurationException {

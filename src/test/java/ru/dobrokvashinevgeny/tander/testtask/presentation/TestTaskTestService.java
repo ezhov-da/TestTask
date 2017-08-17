@@ -61,7 +61,7 @@ public class TestTaskTestService {
 			}
 
 			@Override
-			public int getBatchSize() {
+			public int getСonverterBatchSize() {
 				return BATCH_SIZE;
 			}
 		};

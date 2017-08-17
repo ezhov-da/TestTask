@@ -67,7 +67,7 @@ public class TestTaskService {
 		throws TestTaskServiceException, EntryTransferException {
 		final EntryGenerator entryGenerator = createEntryGenerator();
 		final EntryTransfer entryTransfer = createEntryTransfer();
-		entryTransfer.transferFromGeneratorToRepository(entryGenerator, n, config.getBatchSize(), dataSource);
+		entryTransfer.transferFromGeneratorToRepository(entryGenerator, n, config.getTransferBatchSize(), dataSource);
 	}
 
 	private EntryGenerator createEntryGenerator() throws TestTaskServiceException {
@@ -105,7 +105,7 @@ public class TestTaskService {
 
 		final EntryConverterService converterService = createEntryConverterService();
 
-		converterService.convertEntriesToXml(entryRepository, fileRepository, IN_XML_FILE_NAME, config.getBatchSize());
+		converterService.convertEntriesToXml(entryRepository, fileRepository, IN_XML_FILE_NAME, config.getСonverterBatchSize());
 	}
 
 	private FileRepository createFileStore() throws TestTaskServiceException {
@@ -123,7 +123,7 @@ public class TestTaskService {
 		final EntryConverterService converterService = createEntryConverterService();
 
 		converterService.transformEntriesXml(fileRepository, XSLT_FILE_NAME, IN_XML_FILE_NAME, OUT_XML_FILE_NAME,
-			TMP_XML_FILE_NAME, config.getBatchSize());
+			TMP_XML_FILE_NAME, config.getTransformerBatchSize());
 	}
 
 	private long getSumOfEntriesData() throws TestTaskServiceException, CalculatorException {

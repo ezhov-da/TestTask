@@ -35,7 +35,17 @@ public interface TestTaskServiceConfig {
 	String getCalculatorImplClassName();
 
 	/**
-	 * Размер пакета для паектной обработки данных в приложении
+	 * Размер пакета для пакетной обработки данных из генератора в репозитарий
 	 */
-	int getBatchSize();
+	int getTransferBatchSize();
+
+	/**
+	 * Размер пакета для пакетной обработки данных converter to XML
+	 */
+	int getСonverterBatchSize();
+
+	/**
+	 * Размер пакета для пакетной обработки данных XSLT transformer
+	 */
+	int getTransformerBatchSize();
 }

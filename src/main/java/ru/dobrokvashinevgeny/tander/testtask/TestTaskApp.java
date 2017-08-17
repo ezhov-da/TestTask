@@ -21,7 +21,10 @@ public class TestTaskApp {
 	public TestTaskApp(AppConfig appConfig) {
 		this.appConfig = appConfig;
 		System.out.println("n = " + appConfig.getN());
-		LOG.log(Level.INFO, "n = " + appConfig.getN() + ", batchSize = " + appConfig.getBatchSize());
+		LOG.log(Level.INFO, "n = " + appConfig.getN() +
+			", transfer.batchSize = " + appConfig.getTransferBatchSize() +
+			", converter.batchSize = " + appConfig.getСonverterBatchSize() +
+			", transformer.batchSize = " + appConfig.getTransformerBatchSize());
 	}
 
 	/**
