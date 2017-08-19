@@ -23,7 +23,7 @@ public class TestTaskApp {
 		System.out.println("n = " + appConfig.getN());
 		LOG.log(Level.INFO, "n = " + appConfig.getN() +
 			", transfer.batchSize = " + appConfig.getTransferBatchSize() +
-			", converter.batchSize = " + appConfig.getСonverterBatchSize() +
+			", converter.batchSize = " + appConfig.getConverterBatchSize() +
 			", transformer.batchSize = " + appConfig.getTransformerBatchSize());
 	}
 
