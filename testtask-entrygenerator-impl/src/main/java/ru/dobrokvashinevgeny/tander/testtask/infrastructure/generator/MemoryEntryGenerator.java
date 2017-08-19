@@ -11,7 +11,7 @@ import ru.dobrokvashinevgeny.tander.testtask.service.generator.EntryGenerator;
  * Реализация генератора Entries в памяти
  */
 public class MemoryEntryGenerator implements EntryGenerator {
-	private Long currentValue = 1L;
+	private long currentValue = 1L;
 
 	@Override
 	public Entry getNewEntry() {
@@ -22,10 +22,8 @@ public class MemoryEntryGenerator implements EntryGenerator {
 		return currentValue++;
 	}
 
-	/**
-	 * Устанавливает текущее значение генератора
-	 */
-	public void setCurrentValue(Long currentValue) {
+	@Override
+	public void setCurrentValue(long currentValue) {
 		this.currentValue = currentValue;
 	}
 }

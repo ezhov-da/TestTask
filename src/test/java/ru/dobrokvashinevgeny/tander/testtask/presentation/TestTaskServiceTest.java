@@ -16,7 +16,7 @@ import static ru.dobrokvashinevgeny.tander.testtask.infrastructure.configuration
 
 /**
  */
-public class TestTaskTestService {
+public class TestTaskServiceTest {
 	private static final int BATCH_SIZE = 2;
 	private static final long N = 2;
 
@@ -66,7 +66,7 @@ public class TestTaskTestService {
 			}
 
 			@Override
-			public int getСonverterBatchSize() {
+			public int getConverterBatchSize() {
 				return BATCH_SIZE;
 			}
 

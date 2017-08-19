@@ -42,7 +42,7 @@ public interface TestTaskServiceConfig {
 	/**
 	 * Размер пакета для пакетной обработки данных converter to XML
 	 */
-	int getСonverterBatchSize();
+	int getConverterBatchSize();
 
 	/**
 	 * Размер пакета для пакетной обработки данных XSLT transformer

@@ -12,4 +12,9 @@ public interface EntryGenerator {
 	 * @throws EntryGeneratorException если произошла ошибка генерации данных
 	 */
 	Entry getNewEntry() throws EntryGeneratorException;
+
+	/**
+	 * Устанавливает текущее значение генератора
+	 */
+	void setCurrentValue(long currentValue);
 }

@@ -105,7 +105,7 @@ public class TestTaskService {
 
 		final EntryConverterService converterService = createEntryConverterService();
 
-		converterService.convertEntriesToXml(entryRepository, fileRepository, IN_XML_FILE_NAME, config.getСonverterBatchSize());
+		converterService.convertEntriesToXml(entryRepository, fileRepository, IN_XML_FILE_NAME, config.getConverterBatchSize());
 	}
 
 	private FileRepository createFileStore() throws TestTaskServiceException {

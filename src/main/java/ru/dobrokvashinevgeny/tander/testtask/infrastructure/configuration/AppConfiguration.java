@@ -121,7 +121,7 @@ public class AppConfiguration implements AppConfig {
 	}
 
 	@Override
-	public int getСonverterBatchSize() {
+	public int getConverterBatchSize() {
 		return converterBatchSize;
 	}
 
