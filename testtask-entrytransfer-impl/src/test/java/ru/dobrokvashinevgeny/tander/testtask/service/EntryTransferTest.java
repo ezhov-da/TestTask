@@ -20,7 +20,6 @@ import static org.mockito.Mockito.*;
 public class EntryTransferTest {
 	private static final long FROM_ENTRY = 1L;
 	private static final int NUMBER_OF_ENTRIES_TO_TRANSFER = 5;
-	private static final int ENTRIES_BATCH_SIZE = 2;
 
 	private PreparedStatement preparedStatement;
 	private DataSource dataSource;
