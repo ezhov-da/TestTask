@@ -5,8 +5,9 @@
 package ru.dobrokvashinevgeny.tander.testtask;
 
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.DataSource;
-import ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence.*;
-import ru.dobrokvashinevgeny.tander.testtask.service.*;
+import ru.dobrokvashinevgeny.tander.testtask.infrastructure.AppFactoryImpl;
+import ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence.DbDataSource;
+import ru.dobrokvashinevgeny.tander.testtask.service.TestTaskService;
 
 import java.util.logging.*;
 
@@ -41,6 +42,6 @@ public class TestTaskApp {
 	 * @return TestTaskService - сервис приложения TestTaskApp
 	 */
 	public TestTaskService createTestTaskService() {
-		return new TestTaskService(appConfig.getN(), appConfig, dataSource);
+		return new TestTaskService(appConfig.getN(), new AppFactoryImpl(appConfig), appConfig, dataSource);
 	}
 }

@@ -4,6 +4,7 @@
 
 package ru.dobrokvashinevgeny.tander.testtask.service;
 
+import ru.dobrokvashinevgeny.tander.testtask.*;
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.DataSource;
 import ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence.EntryDaoImpl;
 import ru.dobrokvashinevgeny.tander.testtask.persistence.*;
@@ -18,20 +19,22 @@ public class SingleThreadEntryTransfer implements EntryTransfer {
 	private static final int SQL_BATCH_SIZE = 200;
 
 	@Override
-	public void transferFromGeneratorToRepository(EntryGenerator source,
-												  long numberOfEntriesToTransfer,
-												  int entriesBatchSize, DataSource dataSource)
+	public void transferFromGeneratorToRepository(AppFactory appFactory,
+												  long fromEntry, long numberOfEntriesToTransfer,
+												  DataSource dataSource)
 		throws EntryTransferException {
 		try(Connection connection = dataSource.getConnection()) {
-			EntryDao entryDao = new EntryDaoImpl(connection);
+			final EntryDao entryDao = new EntryDaoImpl(connection);
 			entryDao.startTransaction();
 
+			final EntryGenerator entryGenerator = appFactory.createEntryGenerator();
+			entryGenerator.setCurrentValue(fromEntry);
 			for (int curBatchNumber = 0;
 				 curBatchNumber < getNumberOfBatchExecutions(numberOfEntriesToTransfer, SQL_BATCH_SIZE);
 				 curBatchNumber++) {
 				try {
 					entryDao.startEntryBatch();
-					transferEntriesBatch(source, entryDao,
+					transferEntriesBatch(entryGenerator, entryDao,
 						getEntriesBatchSize(numberOfEntriesToTransfer, SQL_BATCH_SIZE, curBatchNumber));
 				} finally {
 					entryDao.endEntryBatch();
@@ -39,7 +42,7 @@ public class SingleThreadEntryTransfer implements EntryTransfer {
 			}
 
 			entryDao.completeTransaction();
-		} catch (EntryGeneratorException | EntryDaoException | SQLException e) {
+		} catch (EntryGeneratorException | EntryDaoException | SQLException | AppFactoryException e) {
 			throw  new EntryTransferException(e);
 		}
 	}

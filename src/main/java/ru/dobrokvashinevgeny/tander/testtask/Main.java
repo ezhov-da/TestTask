@@ -30,7 +30,7 @@ public class Main {
 
 			System.out.println("Sum of Entries = " + sumOfEntries);
 			LOG.log(Level.INFO, "Work time: " + (System.currentTimeMillis() - beginTime) + " ms.");
-		} catch (AppConfigurationException | TestTaskServiceException e) {
+		} catch (AppConfigurationException | TestTaskServiceException | AppFactoryException e) {
 			processGeneralException(e);
 		}
 	}

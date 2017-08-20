@@ -5,6 +5,7 @@
 package ru.dobrokvashinevgeny.tander.testtask.presentation;
 
 import org.junit.Test;
+import ru.dobrokvashinevgeny.tander.testtask.AppFactory;
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.EntryRepository;
 import ru.dobrokvashinevgeny.tander.testtask.service.generator.EntryGenerator;
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.DataSource;
@@ -12,6 +13,7 @@ import ru.dobrokvashinevgeny.tander.testtask.service.*;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static ru.dobrokvashinevgeny.tander.testtask.infrastructure.configuration.AppConfiguration.*;
 
 /**
@@ -19,6 +21,7 @@ import static ru.dobrokvashinevgeny.tander.testtask.infrastructure.configuration
 public class TestTaskServiceTest {
 	private static final int BATCH_SIZE = 2;
 	private static final long N = 2;
+	private static final long FROM_ENTRY = 1L;
 
 	@Test
 	public void test() throws Exception {
@@ -30,36 +33,6 @@ public class TestTaskServiceTest {
 		final EntryRepository entryRepository = mock(EntryRepository.class);
 		DataSource dataSource = mock(DataSource.class);
 		TestTaskServiceConfig testTaskServiceConfig = new TestTaskServiceConfig() {
-			@Override
-			public String getEntryGeneratorImplClassName() {
-				return "generator";
-			}
-
-			@Override
-			public String getEntryRepositoryImplClassName() {
-				return "entryRep";
-			}
-
-			@Override
-			public String getEntryTransferImplClassName() {
-				return "transfer";
-			}
-
-			@Override
-			public String getEntryConverterImplClassName() {
-				return "converter";
-			}
-
-			@Override
-			public String getFileRepositoryImplClassName() {
-				return "filerep";
-			}
-
-			@Override
-			public String getCalculatorImplClassName() {
-				return "calculator";
-			}
-
 			@Override
 			public int getTransferBatchSize() {
 				return BATCH_SIZE;
@@ -75,36 +48,23 @@ public class TestTaskServiceTest {
 				return BATCH_SIZE;
 			}
 		};
+		AppFactory appFactory = mock(AppFactory.class);
+		when(appFactory.createEntryGenerator()).thenReturn(entryGenerator);
+		when(appFactory.createCalculator()).thenReturn(calculator);
+		when(appFactory.createEntryConverterService()).thenReturn(converterService);
+		when(appFactory.createEntryRepository(dataSource)).thenReturn(entryRepository);
+		when(appFactory.createEntryTransfer()).thenReturn(entryTransfer);
+		when(appFactory.createFileRepository()).thenReturn(fileRepository);
 
-		TestTaskService testTaskService = new TestTaskService(N, testTaskServiceConfig, dataSource) {
-			@Override
-			protected Object getInstanceWoParamsByClassName(String className) throws TestTaskServiceException {
-				switch (className) {
-					case "generator": return entryGenerator;
-					case "entryRep": return entryRepository;
-					case "transfer": return entryTransfer;
-					case "converter": return converterService;
-					case "filerep": return fileRepository;
-					case "calculator": return calculator;
-				}
-				return null;
-			}
-
+		TestTaskService testTaskService = new TestTaskService(N, appFactory, testTaskServiceConfig, dataSource) {
 			@Override
 			protected void initEntryRepositoryStructure() throws EntryServiceException {
-			}
-
-			@Override
-			protected EntryRepository createEntryRepository(DataSource dataSource) throws TestTaskServiceException {
-				return entryRepository;
 			}
 		};
 
 		testTaskService.calculateSumOfEntriesData();
 
-		verify(entryTransfer)
-				.transferFromGeneratorToRepository(
-					entryGenerator, N, BATCH_SIZE, dataSource);
+		verify(entryTransfer).transferFromGeneratorToRepository(appFactory, FROM_ENTRY, N, dataSource);
 		verify(converterService)
 			.convertEntriesToXml(entryRepository, fileRepository, IN_XML_FILE_NAME, BATCH_SIZE);
 		verify(converterService)
