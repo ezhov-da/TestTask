@@ -8,10 +8,13 @@ import ru.dobrokvashinevgeny.tander.testtask.*;
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.DataSource;
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.EntryRepository;
 
+import java.util.logging.*;
+
 /**
  * Класс TestTaskService - сервис приложения TestTaskApp
  */
 public class TestTaskService {
+	private final static Logger LOG = Logger.getLogger(TestTaskService.class.getName());
 	private static final String XSLT_FILE_NAME = "1to2.xslt";
 	private static final String IN_XML_FILE_NAME = "1.xml";
 	private static final String OUT_XML_FILE_NAME = "2.xml";
@@ -67,7 +70,10 @@ public class TestTaskService {
 	private void transferFromGeneratorToRepository()
 		throws TestTaskServiceException, EntryTransferException, AppFactoryException {
 		final EntryTransfer entryTransfer = appFactory.createEntryTransfer();
+		long beginTime = System.currentTimeMillis();
 		entryTransfer.transferFromGeneratorToRepository(appFactory, 1, n, dataSource);
+		LOG.log(Level.INFO, "transferFromGeneratorToRepository duration - " + (System.currentTimeMillis() -
+			beginTime) + " ms");
 	}
 
 	private void convertEntriesToXml()
