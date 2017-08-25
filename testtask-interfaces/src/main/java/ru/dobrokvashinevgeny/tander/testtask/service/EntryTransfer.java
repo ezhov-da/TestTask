@@ -4,7 +4,7 @@ import ru.dobrokvashinevgeny.tander.testtask.AppFactory;
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.DataSource;
 
 /**
- * Интерфейс сервиса передачи сгенерированных Entries в их хранилище для сохренения
+ * Интерфейс сервиса передачи сгенерированных Entries в их хранилище для сохранения
  */
 public interface EntryTransfer {
 	/**
