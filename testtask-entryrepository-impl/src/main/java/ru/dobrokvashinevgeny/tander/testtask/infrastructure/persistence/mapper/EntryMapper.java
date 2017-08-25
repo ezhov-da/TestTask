@@ -33,7 +33,7 @@ public class EntryMapper extends AbstractMapper {
 		@Override
 		public String sql() {
 			return "select " + FIELD_NAME +
-				" from (select " + FIELD_NAME + " from " + TABLE_NAME + " order by " + FIELD_NAME + ") " +
+				" from (select " + FIELD_NAME + " from " + TABLE_NAME + " order by " + FIELD_NAME + ") as t " +
 				"where " + FIELD_NAME + " between ? and ?";
 		}
 
