@@ -22,8 +22,7 @@ import java.util.*;
  */
 public class JaxbEntryConverterService implements EntryConverterService {
 	@Override
-	public void convertEntriesToXml(EntryRepository entryRepository, FileRepository fileRepository,
-	                                String destXmlFileName, int batchSize)
+	public void convertEntriesToXml(String destXmlFileName, int batchSize, EntryRepository entryRepository, FileRepository fileRepository)
 			throws EntryConverterServiceException {
 		try(BufferedWriter destXmlWriter = fileRepository.getFileDataWriterByName(destXmlFileName)) {
 			Marshaller marshaller = getJaxbMarshaller();

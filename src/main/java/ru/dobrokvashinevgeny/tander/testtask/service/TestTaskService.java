@@ -84,8 +84,8 @@ public class TestTaskService {
 
 		final EntryConverterService converterService = appFactory.createEntryConverterService();
 
-		converterService.convertEntriesToXml(entryRepository, fileRepository, IN_XML_FILE_NAME,
-			testTaskServiceConfig.getConverterBatchSize());
+		converterService.convertEntriesToXml(IN_XML_FILE_NAME, testTaskServiceConfig.getConverterBatchSize(),
+			entryRepository, fileRepository);
 	}
 
 	private void transformEntriesXml() throws TestTaskServiceException, EntryConverterServiceException, AppFactoryException {

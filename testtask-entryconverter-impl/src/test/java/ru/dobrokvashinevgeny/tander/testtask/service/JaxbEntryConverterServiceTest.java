@@ -38,7 +38,7 @@ public class JaxbEntryConverterServiceTest {
 
 		List<List<Entry>> entries = new ArrayList<>();
 		int counter = 1;
-		int entriesCount = BATCH_SIZE * 3 + 2;
+		long entriesCount = BATCH_SIZE * 3 + 2;
 		for(int j = 0; j < entriesCount / BATCH_SIZE; j++) {
 			List<Entry> entriesBatch = new ArrayList<>();
 			for (long i = 1; i <= BATCH_SIZE; i++) {
@@ -68,7 +68,7 @@ public class JaxbEntryConverterServiceTest {
 		}
 		expectedEntriesXml.append("</entries>");
 
-		converterService.convertEntriesToXml(entryRepository, fileRepository, OUT_XML_FILE_NAME, BATCH_SIZE);
+		converterService.convertEntriesToXml(OUT_XML_FILE_NAME, BATCH_SIZE, entryRepository, fileRepository);
 
 		verify(fileRepository).getFileDataWriterByName(OUT_XML_FILE_NAME);
 		verify(entryRepository).getEntriesFromRange(1, 3);
@@ -88,7 +88,7 @@ public class JaxbEntryConverterServiceTest {
 
 		List<List<Entry>> entries = new ArrayList<>();
 		int counter = 1;
-		int entriesCount = BATCH_SIZE * 4;
+		long entriesCount = BATCH_SIZE * 4;
 		for(int j = 0; j < entriesCount / BATCH_SIZE; j++) {
 			List<Entry> entriesBatch = new ArrayList<>();
 			for (long i = 1; i <= BATCH_SIZE; i++) {
@@ -110,7 +110,7 @@ public class JaxbEntryConverterServiceTest {
 		}
 		expectedEntriesXml.append("</entries>");
 
-		converterService.convertEntriesToXml(entryRepository, fileRepository, OUT_XML_FILE_NAME, BATCH_SIZE);
+		converterService.convertEntriesToXml(OUT_XML_FILE_NAME, BATCH_SIZE, entryRepository, fileRepository);
 
 		verify(fileRepository).getFileDataWriterByName(OUT_XML_FILE_NAME);
 		verify(entryRepository).getEntriesFromRange(1, 3);
