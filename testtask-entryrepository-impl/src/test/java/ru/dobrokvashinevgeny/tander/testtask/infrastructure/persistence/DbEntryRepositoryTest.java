@@ -50,7 +50,7 @@ public class DbEntryRepositoryTest {
 		List<Entry> entries = entryRepository.getEntriesFromRange(from, to);
 
 		verify(connection).prepareStatement(eq(
-			"select " + FIELD_NAME + " from (select field from " + TABLE_NAME + " order by " + FIELD_NAME + ") where field between ? and ?"));
+			"select " + FIELD_NAME + " from (select field from " + TABLE_NAME + " order by " + FIELD_NAME + ") as t where field between ? and ?"));
 		verify(stmt).setObject(1, from);
 		verify(stmt).setObject(2, to);
 		assertThat(entries,
