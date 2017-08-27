@@ -11,7 +11,8 @@ public interface EntryConverterService {
 	 * @param destXmlFileName имя XML файла
 	 * @param batchSize размер пакета для пакетной обработки данных
 	 * @param entryRepository хранилище Entries
-	 * @param fileRepository хранилище файлов     @throws EntryConverterServiceException если произошла ошибка во время конвертации
+	 * @param fileRepository хранилище файлов
+	 * @throws EntryConverterServiceException если произошла ошибка во время конвертации
 	 */
 	void convertEntriesToXml(String destXmlFileName, int batchSize, EntryRepository entryRepository, FileRepository fileRepository)
 			throws EntryConverterServiceException;

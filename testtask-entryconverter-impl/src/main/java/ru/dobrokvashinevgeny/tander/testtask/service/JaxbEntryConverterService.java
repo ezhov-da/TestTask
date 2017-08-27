@@ -7,7 +7,6 @@ package ru.dobrokvashinevgeny.tander.testtask.service;
 import org.xml.sax.InputSource;
 import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.*;
 
-import javax.xml.bind.*;
 import javax.xml.namespace.QName;
 import javax.xml.stream.*;
 import javax.xml.stream.events.XMLEvent;
@@ -15,7 +14,6 @@ import javax.xml.transform.*;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.*;
 import java.io.*;
-import java.util.*;
 
 /**
  * Реализация сервиса преобразования Entries на JAXB
@@ -33,85 +31,6 @@ public class JaxbEntryConverterService implements EntryConverterService {
 			).execute();
 		} catch (EntryRepositoryException e) {
 			throw new EntryConverterServiceException(e);
-		}
-	}
-
-	private class SingleThreadConvertEntriesToXmlByBatch {
-		private final long fromEntry;
-		private final long entriesCount;
-		private final String destXmlFileName;
-		private final int batchSize;
-		private final EntryRepository entryRepository;
-		private final FileRepository fileRepository;
-
-		public SingleThreadConvertEntriesToXmlByBatch(long fromEntry, long entriesCount, String destXmlFileName,
-													  int batchSize, EntryRepository entryRepository,
-													  FileRepository fileRepository) {
-			this.fromEntry = fromEntry;
-			this.entriesCount = entriesCount;
-			this.destXmlFileName = destXmlFileName;
-			this.batchSize = batchSize;
-			this.entryRepository = entryRepository;
-			this.fileRepository = fileRepository;
-		}
-
-		public void execute() throws EntryConverterServiceException {
-			try(BufferedWriter destXmlWriter = fileRepository.getFileDataWriterByName(destXmlFileName)) {
-				Marshaller marshaller = getJaxbMarshaller();
-				writeHeaderTo(destXmlWriter);
-
-				long currentEntryId = fromEntry;
-				while (currentEntryId <= getMaxEntryId()) {
-					List<Entry> entries =
-						entryRepository.getEntriesFromRange(currentEntryId, getToEntryId(currentEntryId));
-
-					marshalEntriesBatchToDest(marshaller, entries, destXmlWriter);
-
-					currentEntryId = getToEntryId(currentEntryId) + 1;
-				}
-
-				writeFooterTo(destXmlWriter);
-
-				destXmlWriter.flush();
-			} catch (JAXBException | EntryRepositoryException | FileRepositoryException | IOException e) {
-				throw new EntryConverterServiceException(e);
-			}
-		}
-
-		private Marshaller getJaxbMarshaller() throws JAXBException {
-			JAXBContext context = JAXBContext.newInstance( EntryImpl.class );
-			Marshaller marshaller = context.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-			return marshaller;
-		}
-
-		private void writeHeaderTo(BufferedWriter destXmlWriter) throws IOException {
-			destXmlWriter.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><entries>");
-		}
-
-		private long getToEntryId(long currentEntryId) {
-			long result = currentEntryId + batchSize - 1;
-			if (result > getMaxEntryId()) {
-				result = getMaxEntryId();
-			}
-			return result;
-		}
-
-		long getMaxEntryId() {
-			return fromEntry + entriesCount;
-		}
-
-		private void marshalEntriesBatchToDest(Marshaller marshaller, List<Entry> entries, BufferedWriter destXmlWriter)
-			throws JAXBException, IOException {
-			for (Entry entry : entries) {
-				marshaller.marshal(entry, destXmlWriter);
-			}
-
-			destXmlWriter.flush();
-		}
-
-		private void writeFooterTo(BufferedWriter destXmlWriter) throws IOException {
-			destXmlWriter.write("</entries>");
 		}
 	}
 
