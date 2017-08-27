@@ -21,62 +21,104 @@ import java.util.*;
  * Реализация сервиса преобразования Entries на JAXB
  */
 public class JaxbEntryConverterService implements EntryConverterService {
+	private static final long FROM_ENTRY = 1L;
+
 	@Override
-	public void convertEntriesToXml(String destXmlFileName, int batchSize, EntryRepository entryRepository, FileRepository fileRepository)
+	public void convertEntriesToXml(String destXmlFileName, int batchSize, EntryRepository entryRepository,
+									FileRepository fileRepository)
 			throws EntryConverterServiceException {
-		try(BufferedWriter destXmlWriter = fileRepository.getFileDataWriterByName(destXmlFileName)) {
-			Marshaller marshaller = getJaxbMarshaller();
-			writeHeaderTo(destXmlWriter);
-
-			long currentEntryId = 1;
-			List<Entry> entries =
-					entryRepository.getEntriesFromRange(currentEntryId, getToEntryId(batchSize, currentEntryId));
-			while (null != entries && entries.size() > 0) {
-				marshalEntriesBatchToDest(marshaller, entries, destXmlWriter);
-
-				currentEntryId += batchSize;
-				entries = entryRepository.getEntriesFromRange(currentEntryId, getToEntryId(batchSize, currentEntryId));
-			}
-
-			writeFooterTo(destXmlWriter);
-
-			destXmlWriter.flush();
-		} catch (JAXBException | EntryRepositoryException | FileRepositoryException | IOException e) {
+		try {
+			new SingleThreadConvertEntriesToXmlByBatch(
+				FROM_ENTRY, entryRepository.size(), destXmlFileName, batchSize, entryRepository, fileRepository
+			).execute();
+		} catch (EntryRepositoryException e) {
 			throw new EntryConverterServiceException(e);
 		}
 	}
 
-	private Marshaller getJaxbMarshaller() throws JAXBException {
-		JAXBContext context = JAXBContext.newInstance( EntryImpl.class );
-		Marshaller marshaller = context.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-		return marshaller;
-	}
+	private class SingleThreadConvertEntriesToXmlByBatch {
+		private final long fromEntry;
+		private final long entriesCount;
+		private final String destXmlFileName;
+		private final int batchSize;
+		private final EntryRepository entryRepository;
+		private final FileRepository fileRepository;
 
-	private void writeHeaderTo(BufferedWriter destXmlWriter) throws IOException {
-		destXmlWriter.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><entries>");
-	}
-
-	private long getToEntryId(int batchSize, long currentEntryId) {
-		return currentEntryId + batchSize - 1;
-	}
-
-	private void marshalEntriesBatchToDest(Marshaller marshaller, List<Entry> entries, BufferedWriter destXmlWriter)
-		throws JAXBException, IOException {
-		for (Entry entry : entries) {
-			marshaller.marshal(entry, destXmlWriter);
+		public SingleThreadConvertEntriesToXmlByBatch(long fromEntry, long entriesCount, String destXmlFileName,
+													  int batchSize, EntryRepository entryRepository,
+													  FileRepository fileRepository) {
+			this.fromEntry = fromEntry;
+			this.entriesCount = entriesCount;
+			this.destXmlFileName = destXmlFileName;
+			this.batchSize = batchSize;
+			this.entryRepository = entryRepository;
+			this.fileRepository = fileRepository;
 		}
 
-		destXmlWriter.flush();
-	}
+		public void execute() throws EntryConverterServiceException {
+			try(BufferedWriter destXmlWriter = fileRepository.getFileDataWriterByName(destXmlFileName)) {
+				Marshaller marshaller = getJaxbMarshaller();
+				writeHeaderTo(destXmlWriter);
 
-	private void writeFooterTo(BufferedWriter destXmlWriter) throws IOException {
-		destXmlWriter.write("</entries>");
+				long currentEntryId = fromEntry;
+				while (currentEntryId <= getMaxEntryId()) {
+					List<Entry> entries =
+						entryRepository.getEntriesFromRange(currentEntryId, getToEntryId(currentEntryId));
+
+					marshalEntriesBatchToDest(marshaller, entries, destXmlWriter);
+
+					currentEntryId = getToEntryId(currentEntryId) + 1;
+				}
+
+				writeFooterTo(destXmlWriter);
+
+				destXmlWriter.flush();
+			} catch (JAXBException | EntryRepositoryException | FileRepositoryException | IOException e) {
+				throw new EntryConverterServiceException(e);
+			}
+		}
+
+		private Marshaller getJaxbMarshaller() throws JAXBException {
+			JAXBContext context = JAXBContext.newInstance( EntryImpl.class );
+			Marshaller marshaller = context.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+			return marshaller;
+		}
+
+		private void writeHeaderTo(BufferedWriter destXmlWriter) throws IOException {
+			destXmlWriter.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><entries>");
+		}
+
+		private long getToEntryId(long currentEntryId) {
+			long result = currentEntryId + batchSize - 1;
+			if (result > getMaxEntryId()) {
+				result = getMaxEntryId();
+			}
+			return result;
+		}
+
+		long getMaxEntryId() {
+			return fromEntry + entriesCount;
+		}
+
+		private void marshalEntriesBatchToDest(Marshaller marshaller, List<Entry> entries, BufferedWriter destXmlWriter)
+			throws JAXBException, IOException {
+			for (Entry entry : entries) {
+				marshaller.marshal(entry, destXmlWriter);
+			}
+
+			destXmlWriter.flush();
+		}
+
+		private void writeFooterTo(BufferedWriter destXmlWriter) throws IOException {
+			destXmlWriter.write("</entries>");
+		}
 	}
 
 	@Override
-	public void transformEntriesXml(FileRepository fileRepository, String xsltTemplateFileName, String srcEntriesXmlFileName,
-									String destXmlFileName, String tmpXmlFileName, int batchSize)
+	public void transformEntriesXml(FileRepository fileRepository, String xsltTemplateFileName,
+									String srcEntriesXmlFileName, String destXmlFileName, String tmpXmlFileName,
+									int batchSize)
 			throws EntryConverterServiceException {
 		new TransformEntriesXmlByBatch(
 			fileRepository, xsltTemplateFileName, srcEntriesXmlFileName,
