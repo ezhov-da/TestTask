@@ -84,8 +84,11 @@ public class TestTaskService {
 
 		final EntryConverterService converterService = appFactory.createEntryConverterService();
 
+		long beginTime = System.currentTimeMillis();
 		converterService.convertEntriesToXml(IN_XML_FILE_NAME, testTaskServiceConfig.getConverterBatchSize(),
 			entryRepository, fileRepository);
+		LOG.log(Level.INFO, "convertEntriesToXml duration - " + (System.currentTimeMillis() -
+			beginTime) + " ms");
 	}
 
 	private void transformEntriesXml() throws TestTaskServiceException, EntryConverterServiceException, AppFactoryException {
@@ -102,6 +105,8 @@ public class TestTaskService {
 
 		final Calculator calculator = appFactory.createCalculator();
 
-		return calculator.getSumOfEntriesDataFrom(fileRepository, OUT_XML_FILE_NAME);
+		final long sum = calculator.getSumOfEntriesDataFrom(fileRepository, OUT_XML_FILE_NAME);
+		LOG.log(Level.INFO, "sum = " + sum);
+		return sum;
 	}
 }
