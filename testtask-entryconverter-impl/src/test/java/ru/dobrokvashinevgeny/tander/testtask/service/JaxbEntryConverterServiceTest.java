@@ -76,7 +76,7 @@ public class JaxbEntryConverterServiceTest {
 		verify(entryRepository).getEntriesFromRange(1, 3);
 		verify(entryRepository).getEntriesFromRange(4, 6);
 		verify(entryRepository).getEntriesFromRange(7, 9);
-		verify(entryRepository).getEntriesFromRange(10, 12);
+		verify(entryRepository).getEntriesFromRange(10, 11);
 		verifyNoMoreInteractions(fileRepository, entryRepository);
 		assertThat(writer.toString(), equalTo(expectedEntriesXml.toString()));
 	}
@@ -120,7 +120,6 @@ public class JaxbEntryConverterServiceTest {
 		verify(entryRepository).getEntriesFromRange(4, 6);
 		verify(entryRepository).getEntriesFromRange(7, 9);
 		verify(entryRepository).getEntriesFromRange(10, 12);
-		verify(entryRepository).getEntriesFromRange(13, 13);
 		verifyNoMoreInteractions(fileRepository, entryRepository);
 		assertThat(writer.toString(), equalTo(expectedEntriesXml.toString()));
 	}
