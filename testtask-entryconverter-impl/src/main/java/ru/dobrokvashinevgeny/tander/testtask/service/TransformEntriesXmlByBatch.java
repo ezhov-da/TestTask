@@ -17,7 +17,7 @@ import java.io.*;
 /**
  * Класс TransformEntriesXmlByBatch
  */
-public class TransformEntriesXmlByBatch {
+class TransformEntriesXmlByBatch {
 	private final FileRepository fileRepository;
 	private final String xsltTemplateFileName;
 	private final String srcEntriesXmlFileName;
