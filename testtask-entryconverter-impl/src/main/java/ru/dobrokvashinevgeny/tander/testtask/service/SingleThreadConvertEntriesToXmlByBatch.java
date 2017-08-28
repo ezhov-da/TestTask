@@ -13,13 +13,14 @@ import java.util.List;
 /**
  * Однопоточный пакетный конвертер Entries из хранлища в XML представление в файл
  */
-public class SingleThreadConvertEntriesToXmlByBatch {
+class SingleThreadConvertEntriesToXmlByBatch {
 	private final long fromEntry;
 	private final long entriesCount;
 	private final String destXmlFileName;
 	private final int batchSize;
 	private final EntryRepository entryRepository;
 	private final FileRepository fileRepository;
+	private final boolean withHeaderAndFooter;
 
 	/**
 	 * Создает новый экземпляр по параметрам
@@ -32,13 +33,14 @@ public class SingleThreadConvertEntriesToXmlByBatch {
 	 */
 	public SingleThreadConvertEntriesToXmlByBatch(long fromEntry, long entriesCount, String destXmlFileName,
 												  int batchSize, EntryRepository entryRepository,
-												  FileRepository fileRepository) {
+												  FileRepository fileRepository, boolean withHeaderAndFooter) {
 		this.fromEntry = fromEntry;
 		this.entriesCount = entriesCount;
 		this.destXmlFileName = destXmlFileName;
 		this.batchSize = batchSize;
 		this.entryRepository = entryRepository;
 		this.fileRepository = fileRepository;
+		this.withHeaderAndFooter = withHeaderAndFooter;
 	}
 
 	/**
@@ -76,7 +78,13 @@ public class SingleThreadConvertEntriesToXmlByBatch {
 	}
 
 	private void writeHeaderTo(BufferedWriter destXmlWriter) throws IOException {
-		destXmlWriter.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><entries>");
+		if (withHeaderAndFooter) {
+			destXmlWriter.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><entries>");
+		}
+	}
+
+	private long getMaxEntryId() {
+		return fromEntry + entriesCount - 1;
 	}
 
 	private long getToEntryId(long currentEntryId) {
@@ -85,10 +93,6 @@ public class SingleThreadConvertEntriesToXmlByBatch {
 			result = getMaxEntryId();
 		}
 		return result;
-	}
-
-	long getMaxEntryId() {
-		return fromEntry + entriesCount;
 	}
 
 	private void marshalEntriesBatchToDest(Marshaller marshaller, List<Entry> entries, BufferedWriter destXmlWriter)
@@ -101,6 +105,8 @@ public class SingleThreadConvertEntriesToXmlByBatch {
 	}
 
 	private void writeFooterTo(BufferedWriter destXmlWriter) throws IOException {
-		destXmlWriter.write("</entries>");
+		if (withHeaderAndFooter) {
+			destXmlWriter.write("</entries>");
+		}
 	}
 }

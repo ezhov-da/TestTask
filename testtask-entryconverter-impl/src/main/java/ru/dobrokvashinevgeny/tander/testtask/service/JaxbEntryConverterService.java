@@ -18,7 +18,7 @@ public class JaxbEntryConverterService implements EntryConverterService {
 			throws EntryConverterServiceException {
 		try {
 			new SingleThreadConvertEntriesToXmlByBatch(
-				FROM_ENTRY, entryRepository.size(), destXmlFileName, batchSize, entryRepository, fileRepository
+				FROM_ENTRY, entryRepository.size(), destXmlFileName, batchSize, entryRepository, fileRepository, true
 			).execute();
 		} catch (EntryRepositoryException e) {
 			throw new EntryConverterServiceException(e);
