@@ -26,7 +26,8 @@ public class JaxbMultiThreadEntryConverterByBatchTest {
 	@Test
 	public void testConvertEntriesToXml8Cpu8EntriesOk() throws Exception {
 		EntryRepository entryRepository = mock(EntryRepository.class);
-		when(entryRepository.size()).thenReturn(8L);
+		final long NUMBER_OF_ENTRIES_TO_CONVERT = 8L;
+		when(entryRepository.size()).thenReturn(NUMBER_OF_ENTRIES_TO_CONVERT);
 		FileRepository fileRepository = mock(FileRepository.class);
 		final BufferedWriter bufferedWriter = mock(BufferedWriter.class);
 		when(fileRepository.getFileDataWriterByName(anyString())).thenReturn(bufferedWriter);
@@ -65,7 +66,8 @@ public class JaxbMultiThreadEntryConverterByBatchTest {
 	@Test
 	public void testConvertEntriesToXml8Cpu10EntriesOk() throws Exception {
 		EntryRepository entryRepository = mock(EntryRepository.class);
-		when(entryRepository.size()).thenReturn(10L);
+		final long NUMBER_OF_ENTRIES_TO_CONVERT = 10L;
+		when(entryRepository.size()).thenReturn(NUMBER_OF_ENTRIES_TO_CONVERT);
 		FileRepository fileRepository = mock(FileRepository.class);
 		final BufferedWriter bufferedWriter = mock(BufferedWriter.class);
 		when(fileRepository.getFileDataWriterByName(anyString())).thenReturn(bufferedWriter);
@@ -118,7 +120,8 @@ public class JaxbMultiThreadEntryConverterByBatchTest {
 	@Test(expected = EntryConverterServiceException.class)
 	public void testConvertEntriesToXml8CpuFail() throws Exception {
 		EntryRepository entryRepository = mock(EntryRepository.class);
-		when(entryRepository.size()).thenReturn(8L);
+		final long NUMBER_OF_ENTRIES_TO_CONVERT = 8L;
+		when(entryRepository.size()).thenReturn(NUMBER_OF_ENTRIES_TO_CONVERT);
 		FileRepository fileRepository = mock(FileRepository.class);
 		final BufferedWriter bufferedWriter = mock(BufferedWriter.class);
 		when(fileRepository.getFileDataWriterByName(anyString())).thenReturn(bufferedWriter);

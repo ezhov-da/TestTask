@@ -14,8 +14,6 @@ import java.util.logging.*;
  * Класс JaxbMultiThreadEntryConverterService
  */
 public class JaxbMultiThreadEntryConverterService implements EntryConverterService {
-	private static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
-
 	@Override
 	public void convertEntriesToXml(String destXmlFileName, int batchSize, EntryRepository entryRepository,
 									FileRepository fileRepository) throws EntryConverterServiceException {
@@ -23,6 +21,8 @@ public class JaxbMultiThreadEntryConverterService implements EntryConverterServi
 	}
 
 	static class JaxbMultiThreadEntryConverterByBatch {
+		private static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
+
 		private final Logger LOG = Logger.getLogger(JaxbMultiThreadEntryConverterByBatch.class.getName());
 		private final String destXmlFileName;
 		private final int batchSize;
