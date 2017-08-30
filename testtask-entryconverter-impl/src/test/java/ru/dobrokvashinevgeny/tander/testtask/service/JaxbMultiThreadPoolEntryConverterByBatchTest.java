@@ -26,8 +26,8 @@ public class JaxbMultiThreadPoolEntryConverterByBatchTest {
 
 	@Test
 	public void testConvertEntriesToXml8Cpu8EntriesOk() throws Exception {
-		EntryRepository entryRepository = mock(EntryRepository.class);
 		final long NUMBER_OF_ENTRIES_TO_CONVERT = 8L;
+		EntryRepository entryRepository = mock(EntryRepository.class);
 		when(entryRepository.size()).thenReturn(NUMBER_OF_ENTRIES_TO_CONVERT);
 		FileRepository fileRepository = mock(FileRepository.class);
 		final BufferedWriter bufferedWriter = mock(BufferedWriter.class);
