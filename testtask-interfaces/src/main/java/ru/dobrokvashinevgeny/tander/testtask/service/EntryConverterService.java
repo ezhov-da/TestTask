@@ -8,13 +8,13 @@ import ru.dobrokvashinevgeny.tander.testtask.domain.model.entry.EntryRepository;
 public interface EntryConverterService {
 	/**
 	 * Конвертирует Entries из хранлища в XML представление в файл
-	 * @param entryRepository хранилище Entries
-	 * @param fileRepository хранилище файлов
 	 * @param destXmlFileName имя XML файла
 	 * @param batchSize размер пакета для пакетной обработки данных
+	 * @param entryRepository хранилище Entries
+	 * @param fileRepository хранилище файлов
 	 * @throws EntryConverterServiceException если произошла ошибка во время конвертации
 	 */
-	void convertEntriesToXml(EntryRepository entryRepository, FileRepository fileRepository, String destXmlFileName, int batchSize)
+	void convertEntriesToXml(String destXmlFileName, int batchSize, EntryRepository entryRepository, FileRepository fileRepository)
 			throws EntryConverterServiceException;
 
 	/**

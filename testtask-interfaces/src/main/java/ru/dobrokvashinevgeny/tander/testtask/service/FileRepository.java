@@ -21,4 +21,11 @@ public interface FileRepository {
 	 * @throws FileRepositoryException если произошла ошибка при получении потока
 	 */
 	BufferedWriter getFileDataWriterByName(String fileName) throws FileRepositoryException;
+
+	/**
+	 * Удалить файл
+	 * @param fileName имя удаляемого файла
+	 * @throws FileRepositoryException если произошла ошибка при удалении файла
+	 */
+	void deleteFile(String fileName) throws FileRepositoryException;
 }

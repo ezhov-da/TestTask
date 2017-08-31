@@ -97,7 +97,8 @@ public class MultiThreadForkJoinEntryTransfer implements EntryTransfer {
 
 	TransferBatchRecursiveAction createTransferBatchRecursiveAction(AppFactory appFactory, long fromEntry,
 																	long numberOfEntriesToTransfer,
-																	DataSource dataSource, long cutoffNumberOfEntriesToTransfer) {
+																	DataSource dataSource,
+																	long cutoffNumberOfEntriesToTransfer) {
 		return new TransferBatchRecursiveAction(appFactory, fromEntry, numberOfEntriesToTransfer, dataSource,
 			cutoffNumberOfEntriesToTransfer);
 	}
