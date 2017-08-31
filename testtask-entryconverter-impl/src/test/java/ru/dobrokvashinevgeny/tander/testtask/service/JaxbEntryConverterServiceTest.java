@@ -38,7 +38,7 @@ public class JaxbEntryConverterServiceTest {
 
 		List<List<Entry>> entries = new ArrayList<>();
 		int counter = 1;
-		int entriesCount = BATCH_SIZE * 3 + 2;
+		long entriesCount = BATCH_SIZE * 3 + 2;
 		for(int j = 0; j < entriesCount / BATCH_SIZE; j++) {
 			List<Entry> entriesBatch = new ArrayList<>();
 			for (long i = 1; i <= BATCH_SIZE; i++) {
@@ -61,6 +61,7 @@ public class JaxbEntryConverterServiceTest {
 		when(fileRepository.getFileDataWriterByName(OUT_XML_FILE_NAME)).thenReturn(new BufferedWriter(writer));
 		when(entryRepository.getEntriesFromRange(anyLong(), anyLong()))
 				.thenAnswer(AdditionalAnswers.returnsElementsOf(entries));
+		when(entryRepository.size()).thenReturn(entriesCount);
 
 		StringBuilder expectedEntriesXml = new StringBuilder(XML_HEADER + "<entries>");
 		for (int i = 1; i <= entriesCount; i++ ) {
@@ -68,14 +69,14 @@ public class JaxbEntryConverterServiceTest {
 		}
 		expectedEntriesXml.append("</entries>");
 
-		converterService.convertEntriesToXml(entryRepository, fileRepository, OUT_XML_FILE_NAME, BATCH_SIZE);
+		converterService.convertEntriesToXml(OUT_XML_FILE_NAME, BATCH_SIZE, entryRepository, fileRepository);
 
 		verify(fileRepository).getFileDataWriterByName(OUT_XML_FILE_NAME);
+		verify(entryRepository).size();
 		verify(entryRepository).getEntriesFromRange(1, 3);
 		verify(entryRepository).getEntriesFromRange(4, 6);
 		verify(entryRepository).getEntriesFromRange(7, 9);
-		verify(entryRepository).getEntriesFromRange(10, 12);
-		verify(entryRepository).getEntriesFromRange(13, 15);
+		verify(entryRepository).getEntriesFromRange(10, 11);
 		verifyNoMoreInteractions(fileRepository, entryRepository);
 		assertThat(writer.toString(), equalTo(expectedEntriesXml.toString()));
 	}
@@ -88,7 +89,7 @@ public class JaxbEntryConverterServiceTest {
 
 		List<List<Entry>> entries = new ArrayList<>();
 		int counter = 1;
-		int entriesCount = BATCH_SIZE * 4;
+		long entriesCount = BATCH_SIZE * 4;
 		for(int j = 0; j < entriesCount / BATCH_SIZE; j++) {
 			List<Entry> entriesBatch = new ArrayList<>();
 			for (long i = 1; i <= BATCH_SIZE; i++) {
@@ -103,6 +104,7 @@ public class JaxbEntryConverterServiceTest {
 		when(fileRepository.getFileDataWriterByName(OUT_XML_FILE_NAME)).thenReturn(new BufferedWriter(writer));
 		when(entryRepository.getEntriesFromRange(anyLong(), anyLong()))
 				.thenAnswer(AdditionalAnswers.returnsElementsOf(entries));
+		when(entryRepository.size()).thenReturn(entriesCount);
 
 		StringBuilder expectedEntriesXml = new StringBuilder(XML_HEADER + "<entries>");
 		for (int i = 1; i <= entriesCount; i++ ) {
@@ -110,14 +112,14 @@ public class JaxbEntryConverterServiceTest {
 		}
 		expectedEntriesXml.append("</entries>");
 
-		converterService.convertEntriesToXml(entryRepository, fileRepository, OUT_XML_FILE_NAME, BATCH_SIZE);
+		converterService.convertEntriesToXml(OUT_XML_FILE_NAME, BATCH_SIZE, entryRepository, fileRepository);
 
 		verify(fileRepository).getFileDataWriterByName(OUT_XML_FILE_NAME);
+		verify(entryRepository).size();
 		verify(entryRepository).getEntriesFromRange(1, 3);
 		verify(entryRepository).getEntriesFromRange(4, 6);
 		verify(entryRepository).getEntriesFromRange(7, 9);
 		verify(entryRepository).getEntriesFromRange(10, 12);
-		verify(entryRepository).getEntriesFromRange(13, 15);
 		verifyNoMoreInteractions(fileRepository, entryRepository);
 		assertThat(writer.toString(), equalTo(expectedEntriesXml.toString()));
 	}

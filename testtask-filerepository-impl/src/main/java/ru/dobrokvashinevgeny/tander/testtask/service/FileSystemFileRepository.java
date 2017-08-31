@@ -31,4 +31,13 @@ public class FileSystemFileRepository implements FileRepository {
 			throw new FileRepositoryException(e);
 		}
 	}
+
+	@Override
+	public void deleteFile(String fileName) throws FileRepositoryException {
+		try {
+			Files.deleteIfExists(Paths.get(fileName));
+		} catch (IOException e) {
+			throw new FileRepositoryException(e);
+		}
+	}
 }

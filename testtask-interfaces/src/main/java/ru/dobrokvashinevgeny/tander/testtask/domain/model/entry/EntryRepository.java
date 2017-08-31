@@ -18,4 +18,10 @@ public interface EntryRepository {
 	 * @throws EntryRepositoryException если произошла ошибка во время получения
 	 */
 	List<Entry> getEntriesFromRange(long from, long to) throws EntryRepositoryException;
+
+	/**
+	 * Получить количество Entry хранящихся в хранилище
+	 * @return количество Entry хранящихся в хранилище
+	 */
+	long size() throws EntryRepositoryException;
 }

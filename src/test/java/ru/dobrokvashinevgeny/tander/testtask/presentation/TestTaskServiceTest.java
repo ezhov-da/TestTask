@@ -66,7 +66,7 @@ public class TestTaskServiceTest {
 
 		verify(entryTransfer).transferFromGeneratorToRepository(appFactory, FROM_ENTRY, N, dataSource);
 		verify(converterService)
-			.convertEntriesToXml(entryRepository, fileRepository, IN_XML_FILE_NAME, BATCH_SIZE);
+			.convertEntriesToXml(IN_XML_FILE_NAME, BATCH_SIZE, entryRepository, fileRepository);
 		verify(converterService)
 			.transformEntriesXml(fileRepository, XSLT_FILE_NAME, IN_XML_FILE_NAME, OUT_XML_FILE_NAME,
 				TMP_XML_FILE_NAME, BATCH_SIZE);

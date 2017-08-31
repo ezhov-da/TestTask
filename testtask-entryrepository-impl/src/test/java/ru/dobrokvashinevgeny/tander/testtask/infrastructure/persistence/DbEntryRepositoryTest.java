@@ -13,6 +13,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static ru.dobrokvashinevgeny.tander.testtask.infrastructure.persistence.EntryTable.FIELD_NAME;
@@ -55,5 +56,23 @@ public class DbEntryRepositoryTest {
 		verify(stmt).setObject(2, to);
 		assertThat(entries,
 			containsInAnyOrder(new EntryImpl(2L), new EntryImpl(3L), new EntryImpl(4L)));
+	}
+
+	@Test
+	public void testSizeOk() throws Exception {
+		final long repositorySize = 2L;
+		when(connection.prepareStatement(anyString())).thenReturn(stmt);
+		ResultSet rs = mock(ResultSet.class);
+		when(rs.next()).thenReturn(true);
+		when(rs.getLong(1)).thenReturn(repositorySize);
+		when(stmt.executeQuery()).thenReturn(rs);
+
+		long size = entryRepository.size();
+
+		verify(connection).prepareStatement(eq("select count(*) from " + TABLE_NAME));
+		verify(stmt).executeQuery();
+		verify(rs).next();
+		verify(rs).getLong(1);
+		assertThat(size, equalTo(repositorySize));
 	}
 }

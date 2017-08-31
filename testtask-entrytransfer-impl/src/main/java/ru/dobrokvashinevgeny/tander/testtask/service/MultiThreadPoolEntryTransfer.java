@@ -53,14 +53,14 @@ public class MultiThreadPoolEntryTransfer implements EntryTransfer {
 		}
 	}
 
-	ExecutorService createExecutorService(TransferWorkerUncaughtExceptionHandler transferWorkerUncaughtExceptionHandler) {
+	ExecutorService createExecutorService(TransferWorkerUncaughtExceptionHandler exceptionHandler) {
 		return Executors.newFixedThreadPool(AVAILABLE_PROCESSORS, new ThreadFactory() {
 			private AtomicInteger counter = new AtomicInteger( 0 );
 			@Override
 			public Thread newThread(Runnable r) {
 				Thread thread = new Thread(r);
 				thread.setName("TransferWorkerThread-" + counter.incrementAndGet());
-				thread.setUncaughtExceptionHandler(transferWorkerUncaughtExceptionHandler);
+				thread.setUncaughtExceptionHandler(exceptionHandler);
 				return thread;
 			}
 		});
